@@ -219,6 +219,7 @@ struct AfvalView: View {
                     .padding(.top, 24)
                 }
             }
+            .bovenVervaging()
 
             // Floating nav bar: back button + title
             navBar
@@ -248,7 +249,7 @@ struct AfvalView: View {
 
     private var navBar: some View {
         HStack(alignment: .center, spacing: 12) {
-            BackCircleButton { isPresented = false }
+            BackCircleButton(stijl: .kleur) { isPresented = false }
             Spacer()
         }
         .padding(.horizontal, AppDesign.horizontalPadding)

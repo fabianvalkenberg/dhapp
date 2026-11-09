@@ -241,10 +241,11 @@ struct ParkeerPageView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            .bovenVervaging()
 
             // Floating nav bar: alleen de back-knop is sticky (titel scrollt mee).
             HStack(alignment: .center, spacing: 12) {
-                BackCircleButton { isPresented = false }
+                BackCircleButton(stijl: .kleur) { isPresented = false }
                 Spacer()
             }
             .padding(.horizontal, AppDesign.horizontalPadding)

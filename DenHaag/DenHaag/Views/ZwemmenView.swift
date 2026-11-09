@@ -97,9 +97,10 @@ struct ZwemmenHomeView: View {
                     .padding(.bottom, 120)
                 }
             }
+            .bovenVervaging()
 
             // Floating nav bar: alleen de back-knop is sticky (titel scrollt mee).
-            ZwTerugBalk(actie: sluit)
+            ZwTerugBalk(stijl: .kleur, actie: sluit)
         }
         .background(AppColors.background)
         .ignoresSafeArea(edges: .top)

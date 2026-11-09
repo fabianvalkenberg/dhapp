@@ -58,6 +58,7 @@ struct BerichtenView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
 
             AppColors.background
                 .frame(height: safeTop + 52)
@@ -65,8 +66,7 @@ struct BerichtenView: View {
                 .allowsHitTesting(false)
 
             BackCircleButton { withAnimation(.easeInOut(duration: 0.3)) { isPresented = false } }
-                .padding(.leading, AppDesign.horizontalPadding)
-                .padding(.top, safeTop + 6)
+                .terugknopPlek()
 
             if toonVoorkeuren {
                 BerichtVoorkeurenView(isPresented: $toonVoorkeuren)
@@ -183,6 +183,7 @@ struct BerichtVoorkeurenView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
 
             AppColors.background
                 .frame(height: safeTop + 52)
@@ -190,8 +191,7 @@ struct BerichtVoorkeurenView: View {
                 .allowsHitTesting(false)
 
             BackCircleButton { withAnimation(.easeInOut(duration: 0.25)) { isPresented = false } }
-                .padding(.leading, AppDesign.horizontalPadding)
-                .padding(.top, safeTop + 6)
+                .terugknopPlek()
         }
         .ignoresSafeArea(edges: .top)
     }

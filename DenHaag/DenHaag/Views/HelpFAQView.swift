@@ -81,23 +81,11 @@ struct HelpFAQView: View {
         VStack(spacing: 0) {
             // Back button
             HStack {
-                Button {
-                    isPresented = nil
-                } label: {
-                    Image("arrow-left")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(Color(hex: "2D2D2D"))
-                        .padding(10)
-                        .background(Color.white)
-                        .cornerRadius(22)
-                }
+                BackCircleButton(stijl: .wit) { isPresented = nil }
                 Spacer()
             }
             .padding(.horizontal, AppDesign.horizontalPadding)
-            .padding(.top, 16)
+            .padding(.top, AppDesign.terugknopTop)
             .padding(.bottom, 8)
 
             ScrollView(showsIndicators: false) {
@@ -116,6 +104,7 @@ struct HelpFAQView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)

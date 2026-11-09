@@ -35,7 +35,7 @@ struct AfvalkalenderView: View {
                             .foregroundColor(AppColors.textPrimary)
                         Spacer()
                     }
-                    .padding(.top, AppDesign.safeAreaTop + 18)
+                    .padding(.top, AppDesign.terugknopTop)
 
                     Text("De eerstvolgende ophaalmomenten bij jou in de buurt. Zet een herinnering aan, dan vergeet je het niet.")
                         .font(AppFont.theSans(size: 17, weight: .plain))
@@ -80,6 +80,7 @@ struct AfvalkalenderView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
         }
     }
 

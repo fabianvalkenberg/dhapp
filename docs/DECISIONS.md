@@ -319,3 +319,34 @@ De kop zegt dat de repo niet onder git staat. Dat klopt sinds 2026-10-08 niet
 meer: eerste commit op die datum, remote `github.com/fabianvalkenberg/dhapp`,
 werkwijze in `docs/SAMENWERKEN.md`. De kopie van vóór de split in
 `docs/CLAUDE-md-2026-08-05-voor-split.md` blijft de enige bron voor die versie.
+
+## 2026-11-09 · Eén terugknop, op één plek (design review)
+
+Uit de design review (Figma `wvwF4ED2uW2omIH8vYvDSx`, pagina Prototype v3).
+`BackCircleButton` is nu de enige terugknop: 43 pt rond, blauwe Den Haag-pijl,
+in drie uitvoeringen naar wat erachter ligt: `.wit` (warm grijs rondje op wit),
+`.kleur` (wit met grijze rand op lichtblauw of geel) en `.foto` (glas met witte
+pijl, ook op donkergroen/-blauw). Plaatsen met `.terugknopPlek()`: 8 pt onder
+de statusbalk, links op de grid-marge.
+
+**Afwijking van Figma:** Figma zet de knop op 24 pt van links, omdat dat
+bestand een 24 pt-grid heeft. De app heeft een 20 pt-grid en de reviewnotitie
+over parkeren noemt ook 20 pt. De knop volgt het grid van de app.
+
+**Buiten scope gelaten:** het sluit-kruisje bij kwijtschelding (andere functie),
+de kop van de meldflow en grofvuil (voortgangsbalk-kop, volgt Figma MOR) en de
+fietspas (wordt opnieuw ontworpen).
+
+## 2026-11-09 · Vervaging achter de statusbalk, alleen tijdens scrollen
+
+Uit de design review ("iOS UI"): inhoud liep hard onder klok en batterij door.
+`.bovenVervaging()` op de ScrollView van een volledig scherm legt er een blur
+met wit verloop over (Figma: 106 pt, wit 92→70→0% op 40%). Hij verschijnt pas
+na ~24 pt scrollen, zodat een gele of gekleurde kop in rust niet verbleekt.
+Werkt vanaf iOS 18 (`onScrollGeometryChange`); op iOS 17 geen vervaging.
+
+## 2026-11-09 · Testharnas: `-scherm` en `-tab regelen|hulp`
+
+Voor screenshots zonder tikken: `-scherm instellingen|startscherm|afspraak|
+parkeren|afval|afvalkalender|kwijtschelding|aanvraag|paspoort|berichten|
+vergunningen|meldingstatus` opent dat detailscherm direct.

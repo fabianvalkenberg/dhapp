@@ -232,6 +232,7 @@ struct RegelenView: View {
                         .id("chatBottom")
                 }
             }
+            .bovenVervaging()
             // De scroll eindigt boven de inputbalk (+ toetsenbord), zodat het
             // invoerveld nooit over de antwoordtekst valt — ook niet bij een kort
             // antwoord dat niet kan scrollen.

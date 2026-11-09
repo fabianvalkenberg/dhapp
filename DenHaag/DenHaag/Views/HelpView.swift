@@ -61,6 +61,7 @@ struct HelpView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
 
             // FAQ detail overlay
             if let category = showFAQCategory {

@@ -38,6 +38,7 @@ struct VersieSelectionView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
 
             // Witte balk achter de terug-knop, zodat de lijst er niet doorheen scrolt.
             AppColors.background

@@ -153,26 +153,17 @@ struct SettingsView: View {
                         .padding(.bottom, 40)
                     }
                 }
+                .bovenVervaging()
                 .ignoresSafeArea(edges: .top)
 
                 // Back button overlay
                 HStack {
-                    Button {
-                        isPresented = false
-                    } label: {
-                        Image("arrow-left")
-                            .renderingMode(.template)
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.white)
-                            .padding(12)
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(Circle())
-                    }
+                    BackCircleButton(stijl: .foto) { isPresented = false }
                     Spacer()
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
-                .padding(.top, 6)
+                // Deze laag respecteert de safe area al: alleen de 8 pt erbij.
+                .padding(.top, AppDesign.terugknopTop)
             }
 
             // Uitgangspunten overlay

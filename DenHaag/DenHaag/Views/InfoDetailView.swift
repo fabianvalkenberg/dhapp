@@ -47,10 +47,10 @@ struct InfoDetailView: View {
                 .padding(.horizontal, AppDesign.horizontalPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .bovenVervaging()
 
             BackCircleButton(action: onClose)
-                .padding(.leading, AppDesign.horizontalPadding)
-                .padding(.top, AppDesign.safeAreaTop + 6)
+                .terugknopPlek()
         }
     }
 

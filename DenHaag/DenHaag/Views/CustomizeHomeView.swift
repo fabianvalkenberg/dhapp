@@ -15,20 +15,8 @@ struct CustomizeHomeView: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 // Back button
-                Button {
-                    isPresented = false
-                } label: {
-                    Image("arrow-left")
-                        .renderingMode(.template)
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(AppColors.blauw3)
-                        .padding(12)
-                        .background(Color.gray.opacity(0.1))
-                        .clipShape(Circle())
-                }
-                .padding(.horizontal, AppDesign.horizontalPadding)
-                .padding(.top, safeTop + 8)
+                BackCircleButton(stijl: .wit) { isPresented = false }
+                    .terugknopPlek(binnenSafeArea: true)
 
                 // Title
                 Text(lang.t("customize_home"))

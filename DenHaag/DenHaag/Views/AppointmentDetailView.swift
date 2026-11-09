@@ -160,11 +160,11 @@ struct AppointmentDetailView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
 
             // Zwevende back-knop (titel scrollt eronder weg) — zelfde patroon overal.
             BackCircleButton { onClose() }
-                .padding(.leading, AppDesign.horizontalPadding)
-                .padding(.top, safeTop + 6)
+                .terugknopPlek()
         }
         // De notch-hoogte zit al in safeTop; niet dubbel tellen.
         .ignoresSafeArea(edges: .top)

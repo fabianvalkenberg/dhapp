@@ -166,22 +166,12 @@ struct EventDetailView: View {
                     .padding(.top, 24)
                 }
             }
+            .bovenVervaging()
             .ignoresSafeArea(edges: .top)
 
             // Back button
             HStack {
-                Button {
-                    isPresented = false
-                } label: {
-                    Image("arrow-left")
-                        .renderingMode(.template)
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(.white)
-                        .padding(12)
-                        .background(Color.black.opacity(0.3))
-                        .clipShape(Circle())
-                }
+                BackCircleButton(stijl: .foto) { isPresented = false }
                 Spacer()
             }
             .padding(.horizontal, AppDesign.horizontalPadding)

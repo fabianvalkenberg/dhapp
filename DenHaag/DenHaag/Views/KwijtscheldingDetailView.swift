@@ -168,6 +168,7 @@ struct KwijtscheldingDetailView: View {
                     .padding(.horizontal, AppDesign.horizontalPadding)
                 }
             }
+            .bovenVervaging()
             .ignoresSafeArea(edges: .top)
 
             // Close button

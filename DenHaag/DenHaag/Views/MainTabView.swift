@@ -282,6 +282,34 @@ struct MainTabView: View {
             if let i = ProcessInfo.processInfo.arguments.firstIndex(of: "-tab"),
                i + 1 < ProcessInfo.processInfo.arguments.count,
                ProcessInfo.processInfo.arguments[i + 1] == "buurt" { selectedTab = .buurt }
+            // `-tab regelen|hulp` opent die tab.
+            if let i = ProcessInfo.processInfo.arguments.firstIndex(of: "-tab"),
+               i + 1 < ProcessInfo.processInfo.arguments.count {
+                switch ProcessInfo.processInfo.arguments[i + 1] {
+                case "regelen": selectedTab = .regelen
+                case "hulp": selectedTab = .hulp
+                default: break
+                }
+            }
+            // `-scherm <naam>` opent direct een detailscherm (voor screenshots).
+            if let i = ProcessInfo.processInfo.arguments.firstIndex(of: "-scherm"),
+               i + 1 < ProcessInfo.processInfo.arguments.count {
+                switch ProcessInfo.processInfo.arguments[i + 1] {
+                case "instellingen": showSettings = true
+                case "startscherm": showCustomizeSheet = true
+                case "afspraak": showAppointment = true
+                case "parkeren": showParkeren = true
+                case "afval": showAfval = true
+                case "afvalkalender": showAfvalkalender = true
+                case "kwijtschelding": showKwijtschelding = true
+                case "aanvraag": showAanvraag = true
+                case "paspoort": showPaspoort = true
+                case "berichten": showBerichten = true
+                case "vergunningen": showVergunningen = true
+                case "meldingstatus": showMeldingStatus = true
+                default: break
+                }
+            }
             // `-geennaam` slaat de naamvraag van de testversie over.
             if ProcessInfo.processInfo.arguments.contains("-geennaam") { return }
             #endif
