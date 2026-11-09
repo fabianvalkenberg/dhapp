@@ -437,3 +437,18 @@ grid (`contentMargins`).
 `ItemListView` reageerde alleen op icoon, tekst en pijl; tikken op de lege
 ruimte in een rij deed niets. Daardoor leken o.a. de veelgestelde vragen in
 Hulp niet te werken. Opgelost met `contentShape` op de rij.
+
+## 2026-11-09 · Afspraakdetail: variant A "Overzicht" (design review)
+
+"Afspraakdetail weinig visueel" en "Locatie niet herkenbaar". Nieuwe opbouw:
+groen datumblok met tijd groot en "Zet in je agenda", een blok Waar met foto
+van het Stadsdeelkantoor Spui (stadhuis) en Route, een afvinklijst met drie
+illustraties, Kosten, Goed om te weten en de twee knoppen.
+
+- Aangifte en toestemmingsformulier staan achter "Kwijt, gestolen of voor een
+  kind?" en klappen open in de lijst.
+- "Zet in je agenda" is nagebootst: je krijgt een bevestiging, er gaat niets
+  naar je echte agenda (prototype).
+- "Meer informatie" opent denhaag.nl, pagina paspoort voor volwassene aanvragen.
+- Twee tips uit de oude versie (10 jaar geldig, oude paspoort meenemen) zijn
+  weg, zoals in Figma. Tips staan nu in je-vorm.
