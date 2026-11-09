@@ -369,3 +369,14 @@ Figma) en het profielrondje is wit. Witte tekst op #1261A3 is ca. 6:1.
 illustraties uit de review (`ill-vergunningen`, `ill-terras`, als SVG). Dit
 vervangt het besluit van 2026-11-07 dat die twee hun icoon hielden; de bieb
 houdt zijn icoon (daar is niets voor aangeleverd).
+
+## 2026-11-09 · Naamscherm: variant A "Geel vlak" (design review)
+
+Fabian koos variant A uit "Onboarding kan visueler". Het naamscherm van de
+testversie heeft nu de gele kop van home met "Hi jij," dat live je naam toont
+terwijl je typt. De welkomstzin en het losse kaart-icoon zijn weg.
+
+**Afwijking van Figma:** de schets gebruikt een feller geel dan de huidige
+home-kop van de app. Omdat de variant draait om herkenning van home, gebruikt
+het naamscherm dezelfde `facetten-geel` op dezelfde schaal als home. Wordt de
+home-kop feller, dan gaat het naamscherm vanzelf mee.
