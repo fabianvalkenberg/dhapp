@@ -60,8 +60,8 @@ class ClaudeService {
         messages.append(["role": "user", "content": question])
 
         let body: [String: Any] = [
-            "model": "claude-sonnet-4-20250514",
-            "max_tokens": 500,
+            "model": "claude-sonnet-5-5",
+            "max_tokens": 1500,
             "system": systemPrompt,
             "messages": messages
         ]
@@ -83,8 +83,8 @@ class ClaudeService {
     private func parseResponse(data: Data) throws -> RegelenAIResponse {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let content = json["content"] as? [[String: Any]],
-              let firstBlock = content.first,
-              let text = firstBlock["text"] as? String else {
+              // Het model kan eerst een (leeg) denkblok sturen; pak het eerste tekstblok.
+              let text = content.first(where: { ($0["type"] as? String) == "text" })?["text"] as? String else {
             throw ClaudeError.parseError
         }
 

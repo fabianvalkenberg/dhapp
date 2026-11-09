@@ -32,9 +32,17 @@ strategie-repo, niet hier) wijst steeds naar dezelfde vier dingen:
 
 ## Scope
 
-**Wel:** vier tabs (home · regelen · buurt · hulp), onboarding met nagebootste
-DigiD, statuskaarten, een aantal detailschermen, taalwissel NL/EN/TR,
-voorleesfunctie, AI-chat in Regelen, uitlegvideo's bij kwijtschelding.
+**Wel:** vier versies om de uitrol te laten zien (V1 melden en fietsen → V2 met
+afval, parkeren, zwemmen en afspraken → V3 met Regelen en buurtleven), plus een
+eigen versie "Prototype testen" voor gebruikerstests. Tabs home · regelen ·
+buurt · hulp (welke er zijn hangt af van de versie). Een rol als inwoner of als
+ondernemer (Kapsalon Anne). Meldflow openbare ruimte naar Figma MOR '26,
+fietspassen, statuskaarten, onboarding met nagebootste DigiD (vanuit het
+profiel), voorleesfunctie, AI-chat in Regelen, uitlegvideo's bij kwijtschelding
+met een taalknop in de speler.
+
+De taalwissel in de app-instellingen is weg: de app is Nederlands. De
+vertalingen (EN/TR) staan nog in `LanguageManager`.
 
 **Niet:** echte koppelingen, echte authenticatie, echte betalingen, consent- en
 privacyflows, toegankelijkheidscertificering. De complexiteit van het écht maken

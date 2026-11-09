@@ -6,6 +6,10 @@ node_modules
 
 # Xcode
 build/
+build-device/
+*.xcodeproj
+*.xcarchive
+*.ipa
 DerivedData/
 xcuserdata/
 *.xcuserstate

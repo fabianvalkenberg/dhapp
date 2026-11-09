@@ -3,14 +3,21 @@ import MapKit
 
 struct BuurtView: View {
     @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var versie: VersieManager
+    @EnvironmentObject var rol: RolManager
 
     enum LocationMode { case thuis, werk }
 
     /// Vaste volgorde + labels van de buurt-onderwerpen (matcht de onboarding-chips,
     /// afvalkalender staat bewust niet op de kaart).
-    static let topicOrder = ["evenementen", "sport", "wegwerk", "bouwplannen", "participatie"]
+    static let topicOrder = ["ondernemen", "evenementen", "sport", "wegwerk", "bouwplannen", "participatie", "fietsparkeren", "koffie"]
+    /// Onderwerpen met vaste plekken door de hele stad, niet met wat er rond je huis speelt.
+    static let plekTopics: Set<String> = ["fietsparkeren", "koffie"]
     private func topicLabel(_ id: String) -> String {
         switch id {
+        case "ondernemen":  return lang.t("buurt_topic_zaak")
+        case "fietsparkeren": return lang.t("fiets_parkeren_title")
+        case "koffie":      return lang.t("fiets_koffie_title")
         case "evenementen": return "Evenementen"
         case "sport":       return "Sport"
         case "wegwerk":     return "Werk aan de weg"
@@ -45,20 +52,53 @@ struct BuurtView: View {
     /// Debounce voor de camera: bij snel door de carrousel scrollen niet telkens
     /// een nieuwe lange camera-animatie starten, alleen op de uiteindelijke kaart.
     @State private var cameraWork: DispatchWorkItem? = nil
+    /// Bij openen op vaste plekken: zoom zo uit dat jij én de dichtstbijzijnde
+    /// plek in beeld zijn, in plaats van strak op de plek in te zoomen.
+    @State private var toonOokThuis = false
 
     private func moveCamera(to region: MKCoordinateRegion) {
         cameraRegion = region
         cameraVersion += 1
     }
 
-    private let items = NeighbourhoodItem.sample
+    private static let allItems = NeighbourhoodItem.voorOndernemer + NeighbourhoodItem.sample
+        + NeighbourhoodItem.stallingen + NeighbourhoodItem.koffieplekken
+
+    /// Alleen de onderwerpen die de gekozen versie van de app heeft.
+    private var items: [NeighbourhoodItem] {
+        Self.allItems.filter {
+            versie.current.allowsBuurtTopic($0.topic)
+                && ($0.topic != "ondernemen" || rol.isOndernemer)
+                // De ondernemer krijgt de Hoefkade-werkzaamheden in een eigen versie.
+                && !(rol.isOndernemer && $0.title == "Werkzaamheden Hoefkade")
+        }
+    }
+
+    /// Zonder buurtnieuws (versie 1 en 2) staan er alleen vaste plekken op de
+    /// kaart. "Alles" zou dan leeg zijn, dus valt die chip weg.
+    private var alleenPlekken: Bool {
+        !items.contains { $0.plek == nil }
+    }
+
+    /// Het filter dat echt geldt: zonder keuze en zonder buurtnieuws het eerste onderwerp.
+    private var effectiveFilter: String? {
+        filter ?? (alleenPlekken ? allTopics.first : nil)
+    }
+
+    private var plekFilterActive: Bool {
+        effectiveFilter.map(Self.plekTopics.contains) ?? false
+    }
 
     // Vaste coördinaten (prototype)
     static let thuisCoord = CLLocationCoordinate2D(latitude: 52.0710, longitude: 4.2998)
     static let werkCoord = CLLocationCoordinate2D(latitude: 52.0850, longitude: 4.3100)
+    /// Kapsalon Anne, Hoefkade 12 (prototype).
+    static let zaakCoord = CLLocationCoordinate2D(latitude: 52.0618, longitude: 4.2994)
 
     private var homeCoordinate: CLLocationCoordinate2D {
-        locationMode == .thuis ? Self.thuisCoord : Self.werkCoord
+        // Als ondernemer staat de kaart standaard rondom je zaak.
+        if locationMode == .thuis { return rol.isOndernemer ? Self.zaakCoord : Self.thuisCoord }
+        return Self.werkCoord
     }
 
     /// Alle onderwerpen die in de data voorkomen, in vaste volgorde. De kaart toont
@@ -70,8 +110,16 @@ struct BuurtView: View {
     }
 
     private var filteredItems: [NeighbourhoodItem] {
-        guard let f = filter else { return items }
-        return items.filter { $0.topic == f }
+        // "Alles" gaat over wat er speelt in de buurt; vaste plekken horen daar niet bij.
+        guard let f = effectiveFilter else { return items.filter { $0.plek == nil } }
+        let lijst = items.filter { $0.topic == f }
+        // Vaste plekken (stallingen): dichtstbijzijnde eerst.
+        guard Self.plekTopics.contains(f) else { return lijst }
+        let thuis = CLLocation(latitude: homeCoordinate.latitude, longitude: homeCoordinate.longitude)
+        return lijst.sorted {
+            CLLocation(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude).distance(from: thuis)
+                < CLLocation(latitude: $1.coordinate.latitude, longitude: $1.coordinate.longitude).distance(from: thuis)
+        }
     }
 
     private var safeTop: CGFloat { AppDesign.safeAreaTop }
@@ -121,7 +169,8 @@ struct BuurtView: View {
                 withAnimation { scrolledID = newID }
             }
             if let item = items.first(where: { $0.id == newID }) {
-                let region = Self.itemRegion(item.coordinate)
+                let region = toonOokThuis ? Self.regioMet(homeCoordinate, item.coordinate) : Self.itemRegion(item.coordinate)
+                toonOokThuis = false
                 cameraWork?.cancel()
                 let work = DispatchWorkItem { moveCamera(to: region) }
                 cameraWork = work
@@ -133,8 +182,10 @@ struct BuurtView: View {
             selectedItemID = newID
         }
         .onChange(of: filter) { _, _ in
-            // Na filterwissel direct inzoomen op het eerste passende item.
+            // Na filterwissel direct inzoomen op het eerste passende item; bij
+            // vaste plekken zo dat jij er ook op staat.
             if let first = filteredItems.first?.id {
+                toonOokThuis = plekFilterActive
                 selectedItemID = first
                 scrolledID = first
             } else {
@@ -142,6 +193,23 @@ struct BuurtView: View {
                 scrolledID = nil
                 moveCamera(to: Self.homeRegion(homeCoordinate))
             }
+        }
+        .onChange(of: versie.current) { _, _ in
+            // Andere versie, andere onderwerpen: terug naar de begintoestand.
+            filter = nil
+            selectFirstPlekIfNeeded()
+        }
+        .onAppear {
+            if rol.isOndernemer { moveCamera(to: Self.homeRegion(homeCoordinate)) }
+            selectFirstPlekIfNeeded()
+        }
+        .onChange(of: rol.rol) { _, _ in
+            // Andere rol, ander middelpunt (thuis of je zaak) en andere onderwerpen.
+            filter = nil
+            selectedItemID = nil
+            scrolledID = nil
+            moveCamera(to: Self.homeRegion(homeCoordinate))
+            selectFirstPlekIfNeeded()
         }
         .onChange(of: locationMode) { _, mode in
             selectedItemID = nil
@@ -171,6 +239,15 @@ struct BuurtView: View {
         }
     }
 
+    /// Staan er alleen vaste plekken op de kaart, dan meteen de eerste tonen in
+    /// plaats van een kaart rond thuis zonder iets erop.
+    private func selectFirstPlekIfNeeded() {
+        guard alleenPlekken, filter == nil, let first = filteredItems.first?.id else { return }
+        toonOokThuis = true
+        selectedItemID = first
+        scrolledID = first
+    }
+
     // MARK: - Header (dropdown thuis/werk)
 
     private var header: some View {
@@ -180,7 +257,7 @@ struct BuurtView: View {
                 .foregroundColor(AppColors.textPrimary)
 
             Menu {
-                Button(lang.t("buurt_home")) { locationMode = .thuis }
+                Button(lang.t(rol.isOndernemer ? "buurt_zaak" : "buurt_home")) { locationMode = .thuis }
                 if werkAddress.isEmpty {
                     Button(lang.t("buurt_set_work")) {
                         werkInput = ""
@@ -195,7 +272,8 @@ struct BuurtView: View {
                 }
             } label: {
                 HStack(spacing: 4) {
-                    Text(locationMode == .thuis ? lang.t("buurt_home") : lang.t("buurt_work"))
+                    Text(plekFilterActive ? lang.t("buurt_my_location")
+                         : locationMode == .thuis ? lang.t(rol.isOndernemer ? "buurt_zaak" : "buurt_home") : lang.t("buurt_work"))
                         .font(AppFont.theMix(size: 26, weight: .bold))
                         .foregroundColor(AppColors.groen3)
                     Image(systemName: "chevron.down")
@@ -225,19 +303,33 @@ struct BuurtView: View {
     // MARK: - Filter chips
 
     private var filterChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                chip(lang.t("buurt_filter_all"), nil)
-                ForEach(allTopics, id: \.self) { topic in
-                    chip(topicLabel(topic), topic)
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    if !alleenPlekken {
+                        chip(lang.t("buurt_filter_all"), nil)
+                    }
+                    ForEach(allTopics, id: \.self) { topic in
+                        chip(topicLabel(topic), topic)
+                            .id(topic)
+                    }
+                }
+                .padding(.horizontal, AppDesign.horizontalPadding)
+            }
+            // Een filter dat van buiten is gezet (home-tegel) kan buiten beeld
+            // staan; schuif de gekozen chip dan in beeld.
+            .onChange(of: filter) { _, new in
+                guard let new else { return }
+                // Kort wachten: de koffie-chip bestaat pas ná de filterwissel.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    withAnimation { proxy.scrollTo(new, anchor: .center) }
                 }
             }
-            .padding(.horizontal, AppDesign.horizontalPadding)
         }
     }
 
     private func chip(_ title: String, _ value: String?) -> some View {
-        let isSelected = filter == value
+        let isSelected = effectiveFilter == value
         return Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 filter = value
@@ -271,7 +363,7 @@ struct BuurtView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(filteredItems) { item in
-                        BuurtCardView(item: item)
+                        card(for: item)
                             .frame(width: cardWidth)
                             // Actief kaartje vol formaat; buren kleiner maar
                             // verticaal gecentreerd t.o.v. het grote kaartje
@@ -280,10 +372,6 @@ struct BuurtView: View {
                                 content
                                     .scaleEffect(phase.isIdentity ? 1.0 : 0.866)
                             }
-                            // Native zoom-transitie: dit kaartje is de bron.
-                            .modifier(ZoomSource(id: item.id, ns: zoomNS))
-                            // Tik → open de detailpagina (zoomt vanuit het kaartje).
-                            .onTapGesture { detailItem = item }
                             .id(item.id)
                     }
                 }
@@ -299,6 +387,21 @@ struct BuurtView: View {
             .clipShape(HorizontalOverflowClip())
         }
         .frame(height: 330)
+    }
+
+    /// Een vaste plek heeft geen detailpagina; tikken zoomt alleen naar de pin.
+    @ViewBuilder
+    private func card(for item: NeighbourhoodItem) -> some View {
+        if let plek = item.plek {
+            PlekCardView(plek: plek, isKoffie: item.type == .koffie, actief: selectedItemID == item.id)
+                .onTapGesture { selectedItemID = item.id }
+        } else {
+            BuurtCardView(item: item)
+                // Native zoom-transitie: dit kaartje is de bron.
+                .modifier(ZoomSource(id: item.id, ns: zoomNS))
+                // Tik → open de detailpagina (zoomt vanuit het kaartje).
+                .onTapGesture { detailItem = item }
+        }
     }
 
     // MARK: - Werkadres sheet
@@ -349,6 +452,17 @@ struct BuurtView: View {
     static func homeRegion(_ center: CLLocationCoordinate2D) -> MKCoordinateRegion {
         let offsetCenter = CLLocationCoordinate2D(latitude: center.latitude - 0.0017, longitude: center.longitude)
         return MKCoordinateRegion(center: offsetCenter, span: MKCoordinateSpan(latitudeDelta: 0.006, longitudeDelta: 0.006))
+    }
+
+    /// Regio waarin zowel jij als de plek staan, met ruimte voor de chips
+    /// bovenin en de carrousel onderin.
+    static func regioMet(_ a: CLLocationCoordinate2D, _ b: CLLocationCoordinate2D) -> MKCoordinateRegion {
+        let dLat = abs(a.latitude - b.latitude), dLon = abs(a.longitude - b.longitude)
+        // Beide punten in de bovenste ~40% van de kaart, boven het kaartje.
+        let span = max(dLat * 3.4, dLon * 1.7, 0.008)
+        let midden = CLLocationCoordinate2D(latitude: (a.latitude + b.latitude) / 2 - span * 0.27,
+                                            longitude: (a.longitude + b.longitude) / 2)
+        return MKCoordinateRegion(center: midden, span: MKCoordinateSpan(latitudeDelta: span, longitudeDelta: span))
     }
 
     /// Strak ingezoomd op het gekozen item; het item zit boven het midden

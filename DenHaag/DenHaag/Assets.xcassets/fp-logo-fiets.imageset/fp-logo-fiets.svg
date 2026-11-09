@@ -1,0 +1,7 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="40" height="26" viewBox="0 0 40 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="logo-fiets">
+<path id="Vector" d="M16 17C16 20.866 12.866 24 9 24C5.13401 24 2 20.866 2 17C2 13.134 5.13401 10 9 10C12.866 10 16 13.134 16 17Z" stroke-width="2" stroke-linecap="round" stroke="white"/>
+<path id="Vector_2" d="M38 17C38 20.866 34.866 24 31 24C27.134 24 24 20.866 24 17C24 13.134 27.134 10 31 10C34.866 10 38 13.134 38 17Z" stroke-width="2" stroke-linecap="round" stroke="white"/>
+<path id="Vector_3" d="M31 17L25 5H15L9 17M15 5L20 17L25 5M12 2H18" stroke-width="2" stroke-linecap="round" stroke="white"/>
+</g>
+</svg>

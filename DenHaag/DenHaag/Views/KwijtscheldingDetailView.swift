@@ -19,6 +19,7 @@ private struct ProcessStep: Identifiable {
 // MARK: - Kwijtschelding Detail View
 
 struct KwijtscheldingDetailView: View {
+    @EnvironmentObject var versie: VersieManager
     @EnvironmentObject var lang: LanguageManager
     @Binding var isPresented: Bool
 
@@ -107,8 +108,10 @@ struct KwijtscheldingDetailView: View {
 
                         // Uitleg in korte video's — staat vóór de tijdlijn,
                         // zodat je eerst kunt snappen wát je hebt aangevraagd.
-                        ExplainerCardView(reeks: VideoLibrary.kwijtschelding) { video in
-                            actieveVideo = video
+                        if versie.current.showsVideos {
+                            ExplainerCardView(reeks: VideoLibrary.kwijtschelding) { video in
+                                actieveVideo = video
+                            }
                         }
 
                         // Process timeline

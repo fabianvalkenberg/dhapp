@@ -7,13 +7,17 @@ struct DenHaagApp: App {
     // Eén gedeelde instantie voor onboarding én home, zodat de gekozen tegels
     // direct doorwerken (niet alleen via een UserDefaults-omweg).
     @StateObject private var settings = HomeSettingsModel()
-    // In-memory (geen @AppStorage): zo wordt de onboarding bij élke koude start
-    // opnieuw getoond — handig voor demo's — maar blijf je tijdens gebruik in de app.
-    @State private var didCompleteOnboarding = false
+    @StateObject private var versie = VersieManager()
+    @StateObject private var afspraak = AfspraakStore()
+    @StateObject private var berichten = BerichtenStore()
+    @StateObject private var rol = RolManager()
+    @StateObject private var melding = MeldingStore()
     @State private var showSplash = true
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        // Taal staat tijdelijk uit: altijd Nederlands, ook als er eerder iets anders is gekozen.
+        UserDefaults.standard.set(AppLanguage.nl.rawValue, forKey: "app_language")
         FirebaseApp.configure()
         // Start de analytics-sessie zodra de app draait.
         AnalyticsService.shared.start()
@@ -22,21 +26,15 @@ struct DenHaagApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                Group {
-                    if didCompleteOnboarding {
-                        MainTabView(settings: settings)
-                    } else {
-                        OnboardingView(
-                            settings: settings,
-                            onFinish: {
-                                withAnimation(.easeInOut(duration: 0.4)) {
-                                    didCompleteOnboarding = true
-                                }
-                            }
-                        )
-                    }
-                }
+                // De app opent direct op home. De onboarding start je zelf
+                // vanuit het profielmenu (SettingsView).
+                MainTabView(settings: settings)
                 .environmentObject(languageManager)
+                .environmentObject(versie)
+                .environmentObject(afspraak)
+                .environmentObject(berichten)
+                .environmentObject(rol)
+                .environmentObject(melding)
                 .opacity(showSplash ? 0 : 1)
 
                 if showSplash {
@@ -54,7 +52,7 @@ struct DenHaagApp: App {
                 #if DEBUG
                 FontDebug.printAllFonts()
                 #endif
-                // Splash screen: show logo, then fade to onboarding/home
+                // Splash screen: logo, daarna naar home
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     showSplash = false
                 }

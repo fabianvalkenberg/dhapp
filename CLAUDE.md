@@ -152,8 +152,11 @@ Korte portrait-video's die een onderwerp uitleggen, nu bij kwijtschelding.
 
 ## Open werk
 
-- [ ] Niets van de sessie van 2026-11-03/04 is gecommit. Volgens
-      `docs/SAMENWERKEN.md` hoort het op een eigen branch met een PR naar `main`.
+- [ ] De code van de sessie van 2026-11-03/04 is niet gecommit (plus
+      `docs/VOICE.md` en `docs/product.md`). Alleen de docs van 2026-11-07
+      staan in een commit, op de lokale branch `werk-2026-11-07`, die nog niet
+      gepusht is en geen remote-koppeling heeft. Volgens `docs/SAMENWERKEN.md`
+      hoort het op een eigen branch met een PR naar `main`.
 - [ ] Microfoon en fotokiezer in de meldflow zijn niet getest (kan niet in de
       simulator). Op het toestel nalopen.
 

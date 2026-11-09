@@ -2,20 +2,23 @@ import SwiftUI
 
 struct BottomTabBar: View {
     @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var versie: VersieManager
     @Binding var selectedTab: MainTabView.Tab
     @State private var animatingTab: MainTabView.Tab?
 
     var body: some View {
         HStack(spacing: 0) {
             Spacer()
-            tabItem(tab: .home, icon: "home", label: lang.t("tab_home"))
-            Spacer()
-            tabItem(tab: .regelen, icon: "done", label: lang.t("tab_regelen"))
-            Spacer()
-            tabItem(tab: .buurt, systemIcon: "map", label: lang.t("tab_buurt"))
-            Spacer()
-            tabItem(tab: .hulp, icon: "help", label: lang.t("tab_hulp"))
-            Spacer()
+            // Alleen de tabs die de gekozen versie van de app heeft.
+            ForEach(versie.current.tabs, id: \.self) { tab in
+                switch tab {
+                case .home:    tabItem(tab: .home, icon: "home", label: lang.t("tab_home"))
+                case .regelen: tabItem(tab: .regelen, icon: "done", label: lang.t("tab_regelen"))
+                case .buurt:   tabItem(tab: .buurt, systemIcon: "map", label: lang.t("tab_buurt"))
+                case .hulp:    tabItem(tab: .hulp, icon: "help", label: lang.t("tab_hulp"))
+                }
+                Spacer()
+            }
         }
         .padding(.top, 16)
         .padding(.bottom, 6)

@@ -17,6 +17,11 @@ enum TileDestination {
     case rechten    // "Waar heb ik recht op" → info-pagina
     case bieb       // "Naar de bieb" → info-pagina
     case buurtFilter(String)  // Snelkoppeling naar Buurt met een onderwerp-filter aan
+    case fietsParkeren  // Kaart met fietsenstallingen
+    case fietspas       // Fietspas met barcode
+    case berichten      // Berichten (notificaties)
+    case vergunningen   // Mijn vergunningen (ondernemer)
+    case meldingStatus  // Status van je laatste melding
 }
 
 // MARK: - Preference Tile
@@ -34,10 +39,14 @@ struct PreferenceTile: Identifiable {
 
     /// Volledige catalogus. `isSelected` hier is de fabrieks-default.
     static let catalog: [PreferenceTile] = [
+        // Fiets — staan bovenaan het startscherm
+        PreferenceTile(id: "fietsparkeren", titleKey: "tile_fietsparkeren", illustration: "ill-fietsparkeren", destination: .fietsParkeren, isSelected: true),
+        PreferenceTile(id: "fietspas",      titleKey: "tile_fietspas",      illustration: "ill-fietspas", destination: .fietspas,   isSelected: true),
+
         // Stap 1 — "Wat doe jij vaak bij de gemeente?" (acties + persoonlijke info)
         PreferenceTile(id: "parkeerbezoek", titleKey: "tile_parkeerbezoek", illustration: "ill-parkeerbezoek",  destination: .parkeren,      isSelected: true),
         PreferenceTile(id: "overlast",      titleKey: "tile_overlast",      illustration: "ill-melding",        destination: .overlast,      isSelected: true),
-        PreferenceTile(id: "afspraak",      titleKey: "tile_afspraak",      illustration: "ill-afspraak",       destination: .afspraak,      isSelected: false, isInteractive: false),
+        PreferenceTile(id: "afspraak",      titleKey: "tile_afspraak",      illustration: "ill-afspraak",       destination: .afspraak,      isSelected: true),
         PreferenceTile(id: "afvalkalender", titleKey: "tile_afvalkalender", illustration: "ill-afvalkalender",  destination: .afvalkalender, isSelected: false),
         PreferenceTile(id: "afval",         titleKey: "tile_afval",         illustration: "ill-afvalzak",       destination: .afval,         isSelected: true),
         PreferenceTile(id: "ooievaarspas",  titleKey: "tile_ooievaarspas",  illustration: "ill-ooievaarspas",   destination: .ooievaarspas,  isSelected: true),
@@ -53,9 +62,54 @@ struct PreferenceTile: Identifiable {
 
         // Niet in onboarding, wel via "Startscherm aanpassen" beschikbaar
         PreferenceTile(id: "mijnbuurt",     titleKey: "tile_mijnbuurt",     illustration: "ill-buurt",          destination: .buurt,         isSelected: false),
-        PreferenceTile(id: "zwemmen",       titleKey: "tile_zwemmen",       illustration: "ill-zwemmen",        destination: .zwemmen,       isSelected: false),
+        PreferenceTile(id: "zwemmen",       titleKey: "tile_zwemmen",       illustration: "ill-zwemmen",        destination: .zwemmen,       isSelected: true),
         PreferenceTile(id: "grofvuil",      titleKey: "tile_grofvuil",      illustration: "ill-grofvuil",       destination: .grofvuil,      isSelected: false),
     ]
+}
+
+// MARK: - Per versie
+
+extension PreferenceTile {
+    /// Alle tegels die bij de onderdelen van een versie horen. Buurt-
+    /// snelkoppelingen niet: die staan al als filters op de kaart.
+    static func standaard(voor versie: AppVersie) -> Set<String> {
+        Set(versie.tegels)
+    }
+}
+
+// MARK: - Ondernemer
+
+extension PreferenceTile {
+    /// Als ondernemer dezelfde tegels met een zakelijke kant: andere naam,
+    /// persoonlijke tegels (zwemmen, Ooievaarspas, fietspas) vallen weg, en
+    /// vergunningen komt vooraan.
+    static func alsOndernemer(_ tegels: [PreferenceTile], metVergunningen: Bool = true) -> [PreferenceTile] {
+        let naam: [String: String] = [
+            "overlast": "tile_ond_melden",
+            "parkeerbezoek": "tile_ond_parkeren",
+            "afval": "tile_ond_afval", "afvalkalender": "tile_ond_afval", "grofvuil": "tile_ond_afval",
+            "afspraak": "tile_ond_afspraak",
+            "fietsparkeren": "tile_ond_fietsparkeren",
+            "buurt_wegwerk": "tile_ond_wegwerk",
+        ]
+        let weg: Set<String> = ["fietspas", "zwemmen", "ooievaarspas", "rechten", "bieb", "mijnbuurt", "buurt_sport"]
+        var gezien = Set<String>()
+        var uit: [PreferenceTile] = !metVergunningen ? [] : [
+            PreferenceTile(id: "ond_vergunningen", titleKey: "tile_ond_vergunningen",
+                           illustration: "sf:doc.text.fill", destination: .vergunningen, isSelected: true),
+            PreferenceTile(id: "ond_terras", titleKey: "tile_ond_terras",
+                           illustration: "sf:umbrella.fill", destination: .vergunningen, isSelected: true),
+        ]
+        for t in tegels where !weg.contains(t.id) {
+            let key = naam[t.id] ?? t.titleKey
+            guard !gezien.contains(key) else { continue }   // drie afvaltegels worden één
+            gezien.insert(key)
+            uit.append(PreferenceTile(id: t.id, titleKey: key, illustration: t.illustration,
+                                      destination: t.destination, isSelected: t.isSelected,
+                                      isInteractive: t.isInteractive))
+        }
+        return uit
+    }
 }
 
 // MARK: - Home Settings Model
@@ -67,6 +121,10 @@ class HomeSettingsModel: ObservableObject {
     @Published var userName: String
 
     private let selectionKey = "selectedTileIDs"
+    /// Welke tegels bestonden toen de selectie werd opgeslagen. Een tegel die
+    /// daarna aan de catalogus is toegevoegd, krijgt zo zijn fabrieks-default
+    /// in plaats van stil uit te staan.
+    private let knownKey = "knownTileIDs"
     private var cancellables = Set<AnyCancellable>()
 
     init() {
@@ -84,7 +142,8 @@ class HomeSettingsModel: ObservableObject {
         var catalog = PreferenceTile.catalog
         if let savedIDs = UserDefaults.standard.array(forKey: selectionKey) as? [String] {
             let saved = Set(savedIDs)
-            for index in catalog.indices {
+            let known = Set(UserDefaults.standard.array(forKey: knownKey) as? [String] ?? savedIDs)
+            for index in catalog.indices where known.contains(catalog[index].id) || saved.contains(catalog[index].id) {
                 catalog[index].isSelected = saved.contains(catalog[index].id)
             }
         }
@@ -109,6 +168,7 @@ class HomeSettingsModel: ObservableObject {
                 guard let self else { return }
                 let ids = tiles.filter { $0.isSelected }.map { $0.id }
                 UserDefaults.standard.set(ids, forKey: self.selectionKey)
+                UserDefaults.standard.set(tiles.map { $0.id }, forKey: self.knownKey)
             }
             .store(in: &cancellables)
     }

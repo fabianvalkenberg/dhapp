@@ -17,6 +17,7 @@ struct BuurtDetailView: View {
         case .evenement: return AppColors.blauw3
         case .werkzaamheden: return AppColors.geel3
         case .denkMee: return AppColors.groen3
+        case .stalling, .koffie: return AppColors.geel3
         }
     }
 

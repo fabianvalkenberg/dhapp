@@ -22,6 +22,9 @@ struct NeighbourhoodItem: Identifiable, Equatable, Hashable {
     let topic: String
     /// Alternatief tijdens werkzaamheden (omleiding/alternatieve route e.d.).
     var alternatief: String? = nil
+    /// Gezet bij een vaste plek (fietsenstalling of koffieplek). Zo'n item krijgt
+    /// een eigen kaartje (`PlekCardView`) en heeft geen detailpagina.
+    var plek: KaartPlek? = nil
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -31,21 +34,28 @@ struct NeighbourhoodItem: Identifiable, Equatable, Hashable {
         case evenement
         case werkzaamheden
         case denkMee
+        case stalling
+        case koffie
 
         var systemIcon: String {
             switch self {
             case .evenement: return "calendar"
             case .werkzaamheden: return "exclamationmark.triangle.fill"
             case .denkMee: return "bubble.left.and.bubble.right.fill"
+            case .stalling: return "bicycle"
+            case .koffie: return "cup.and.saucer.fill"
             }
         }
 
-        /// Eigen lijn-icoon (asset uit assets/icons) voor de kaart-pins.
+        /// Eigen lijn-icoon (asset uit assets/icons) voor de kaart-pins. Een naam
+        /// met "sf:"-prefix is een SF Symbol (er is nog geen eigen icoon voor).
         var markerIcon: String {
             switch self {
             case .evenement: return "calendar"
             case .werkzaamheden: return "alert"
             case .denkMee: return "chat"
+            case .stalling: return "sf:bicycle"
+            case .koffie: return "sf:cup.and.saucer.fill"
             }
         }
 
@@ -55,6 +65,8 @@ struct NeighbourhoodItem: Identifiable, Equatable, Hashable {
             case .evenement: return "buurt_type_event"
             case .werkzaamheden: return "buurt_type_works"
             case .denkMee: return "buurt_type_denkmee"
+            case .stalling: return "fiets_parkeren_title"
+            case .koffie: return "fiets_koffie_title"
             }
         }
     }
@@ -66,6 +78,92 @@ struct NeighbourhoodItem: Identifiable, Equatable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+
+    /// Vaste plekken als buurt-items, dichtstbijzijnde (vanaf thuis) eerst.
+    private static func plekItems(_ plekken: [KaartPlek], type: ItemType, topic: String) -> [NeighbourhoodItem] {
+        let home = CLLocation(latitude: BuurtView.thuisCoord.latitude, longitude: BuurtView.thuisCoord.longitude)
+        return plekken
+            .sorted {
+                CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: home)
+                    < CLLocation(latitude: $1.latitude, longitude: $1.longitude).distance(from: home)
+            }
+            .map {
+                NeighbourhoodItem(type: type, title: $0.title, subtitle: "", detailText: "",
+                                  dateRange: "", location: $0.address, day: "", month: "",
+                                  imageName: $0.imageName, latitude: $0.latitude, longitude: $0.longitude,
+                                  topic: topic, plek: $0)
+            }
+    }
+
+    static let stallingen = plekItems(KaartPlek.stallingen, type: .stalling, topic: "fietsparkeren")
+    static let koffieplekken = plekItems(KaartPlek.koffieplekken, type: .koffie, topic: "koffie")
+
+    /// Wat er rond Kapsalon Anne (Hoefkade 12) speelt en relevant is voor een
+    /// ondernemer: bereikbaarheid, leveringen, meedenken over de winkelstraat.
+    /// Alleen zichtbaar in de rol ondernemer (prototype, verzonnen).
+    static let voorOndernemer: [NeighbourhoodItem] = [
+        NeighbourhoodItem(
+            type: .werkzaamheden,
+            title: "Hoefkade: je zaak blijft bereikbaar",
+            subtitle: "Riool vervangen in fases. Laden en lossen via de Marktweg.",
+            detailText: "Op de Hoefkade vervangen we het riool. We werken in fases van ongeveer twee weken, zodat steeds maar een deel van de straat dicht is. Je zaak blijft voor klanten te voet bereikbaar. Leveranciers kunnen laden en lossen in de Marktweg. Een week voor elke fase krijg je een bericht met de planning, zodat je leveringen en afspraken kunt aanpassen.",
+            dateRange: "16 nov - 18 dec",
+            location: "Hoefkade",
+            day: "16", month: "nov",
+            imageName: "foto-riool",
+            latitude: 52.0623, longitude: 4.3005,
+            topic: "ondernemen",
+            alternatief: "Leveranciers laden en lossen in de Marktweg. Klanten kunnen je zaak te voet blijven bereiken."
+        ),
+        NeighbourhoodItem(
+            type: .evenement,
+            title: "Ondernemersavond Hoefkade",
+            subtitle: "Praat mee met andere ondernemers en de wijkmanager.",
+            detailText: "Twee keer per jaar praten ondernemers uit de straat met de wijkmanager van de gemeente. Deze keer over de werkzaamheden, veiligheid in de avond en de feestverlichting in december. Je hoeft je niet aan te melden. Er is koffie en wat te eten.",
+            dateRange: "26 nov · 19.30 uur",
+            location: "Buurthuis om de hoek",
+            day: "26", month: "nov",
+            imageName: "foto-buurtborrel",
+            latitude: 52.0610, longitude: 4.3016,
+            topic: "ondernemen"
+        ),
+        NeighbourhoodItem(
+            type: .denkMee,
+            title: "Laad- en losplekken in je straat",
+            subtitle: "Waar heb jij een losplek nodig voor leveringen?",
+            detailText: "De gemeente kijkt opnieuw naar de laad- en losplekken in de winkelstraten rond de Hoefkade. Ondernemers weten het best waar leveranciers stoppen en waar dat nu misgaat. Geef op de kaart aan waar jij een losplek nodig hebt en op welke tijden.",
+            dateRange: "Reageren t/m 12 dec",
+            location: "Winkelstraten Hoefkade",
+            day: "12", month: "dec",
+            imageName: "foto-herbestrating",
+            latitude: 52.0629, longitude: 4.2978,
+            topic: "ondernemen"
+        ),
+        NeighbourhoodItem(
+            type: .evenement,
+            title: "Marktdagen: meer mensen in de straat",
+            subtitle: "Op marktdagen lopen er meer mensen langs je zaak.",
+            detailText: "Op marktdagen is het druk rond de Haagse Markt en lopen er meer mensen door de straten eromheen. Parkeerplekken zijn dan snel vol. Wijs klanten met een afspraak op de fietsenstalling en het openbaar vervoer.",
+            dateRange: "Ma, wo, vr en za",
+            location: "Haagse Markt",
+            day: "4", month: "nov",
+            imageName: "foto-markt",
+            latitude: 52.0644, longitude: 4.2993,
+            topic: "ondernemen"
+        ),
+        NeighbourhoodItem(
+            type: .werkzaamheden,
+            title: "Nieuwe fietsenrekken voor de deur",
+            subtitle: "Plaatsing in week 48. De stoep is dan een dag smaller.",
+            detailText: "Voor de winkels op de Hoefkade komen extra fietsenrekken, zodat fietsen niet meer voor de etalages staan. De rekken worden in week 48 geplaatst. Op de dag van plaatsing is de stoep voor je zaak een paar uur smaller.",
+            dateRange: "Week 48",
+            location: "Hoefkade 2-20",
+            day: "23", month: "nov",
+            imageName: "foto-spui",
+            latitude: 52.0614, longitude: 4.2985,
+            topic: "ondernemen"
+        ),
+    ]
 
     /// Dummy-data rondom Den Haag (prototype). De eerste vijf staan vlak rondom
     /// het thuisadres (±150 m), één per onderwerp — zo zie je het concept meteen.

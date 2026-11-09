@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="64" height="36" viewBox="0 0 64 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="icon/bakfiets">
+<path id="Vector" d="M17 26C17 29.866 13.866 33 10 33C6.13401 33 3 29.866 3 26C3 22.134 6.13401 19 10 19C13.866 19 17 22.134 17 26Z" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke="white"/>
+<path id="Vector_2" d="M58 27C58 30.3137 55.3137 33 52 33C48.6863 33 46 30.3137 46 27C46 23.6863 48.6863 21 52 21C55.3137 21 58 23.6863 58 27Z" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke="white"/>
+<path id="Vector_3" d="M10 26L17 12M17 12H26M17 12L13 5H19M26 12L30 26H38M26 12L28 4H32" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke="white"/>
+<path id="Vector_4" d="M38 8H62V22C62 24.6667 60.6667 26 58 26H38V8Z" fill="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke="white"/>
+</g>
+</svg>

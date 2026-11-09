@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="object">
+<circle id="Ellipse 22" cx="14" cy="14" r="14" fill="#2D2D2D"/>
+<path id="Union" d="M16 6H12H11V7V8H7V10H21V8H17V7V6H16ZM16 7H12V8H16V7Z" fill-rule="evenodd" clip-rule="evenodd" fill="white"/>
+<path id="Subtract" d="M9.08535 22C9.29127 22.5826 9.84689 23 10.5 23C11.1531 23 11.7087 22.5826 11.9146 22H9.08535Z" fill-rule="evenodd" clip-rule="evenodd" fill="white"/>
+<path id="Subtract_2" d="M16 22C16.2059 22.5826 16.7615 23 17.4146 23C18.0677 23 18.6233 22.5826 18.8293 22H16Z" fill-rule="evenodd" clip-rule="evenodd" fill="white"/>
+<path id="Subtract_3" d="M14 11H8L9 20.5H14H19L20 11H14ZM11.5 13H10.5V19H17.5V13H16.5V18H11.5V13Z" fill-rule="evenodd" clip-rule="evenodd" fill="white"/>
+</g>
+</svg>
