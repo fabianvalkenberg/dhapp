@@ -62,6 +62,9 @@ struct ItemListView: View {
                     }
                     .padding(.horizontal, 16)
                     .frame(minHeight: 56)          // gelijke hoogte voor elk item
+                    // Hele rij tikbaar: met .plain telt de lege ruimte (Spacer)
+                    // anders niet mee en reageerde alleen tekst of pijl.
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
 
