@@ -380,3 +380,28 @@ terwijl je typt. De welkomstzin en het losse kaart-icoon zijn weg.
 home-kop van de app. Omdat de variant draait om herkenning van home, gebruikt
 het naamscherm dezelfde `facetten-geel` op dezelfde schaal als home. Wordt de
 home-kop feller, dan gaat het naamscherm vanzelf mee.
+
+## 2026-11-09 · Buurt: kaart eerst, kaartjes op verzoek, plus een lijst (design review)
+
+"Kaartjes bedekken de kaart" en "Geen lijstweergave", Figma optie 1. Buurt
+opent nu op de kale kaart met onderin "5 in de buurt" en "Lijst". Een tik op
+een marker of op "5 in de buurt" toont de kaartjes (knop wordt "Verberg"); een
+tik op een leeg stuk kaart klapt ze weer in. "Lijst" toont alles als lijst
+(`BuurtLijstView`), met "Kaart" om terug te gaan. Bij stallingen staat er
+"5 stallingen" en toont de lijst open/dicht.
+
+Optie 3 in het Figma-frame valt buiten beeld en is niet gebouwd.
+
+## 2026-11-09 · Locatiestip boven de markers, radar eronder
+
+"Locatie gebruiker valt weg". De stip is een eigen annotatie (`StipAnnotation`)
+met `zPriority = .max` en een ademende halo; de radar blijft een aparte
+annotatie onder de markers (zie de regel in CLAUDE.md). Figma: stip 16 in een
+witte rand van 22, halo 44.
+
+## 2026-11-09 · Filterchips volgens Figma
+
+"Filterpills afgesneden": de scrollview knipte de rand af. Chips zijn nu 43
+hoog, 18 semibold, gekozen in groen1 met een groen4-rand, zonder schaduw, en
+lopen rechts door tot de schermrand (peek). Namen van de onderwerpen zijn niet
+veranderd (Figma toont andere, maar dat is voorbeeldtekst).

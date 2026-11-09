@@ -19,6 +19,14 @@ final class HomeAnnotation: NSObject, MKAnnotation {
     init(_ c: CLLocationCoordinate2D) { coordinate = c }
 }
 
+/// De blauwe "jij bent hier"-stip. Een eigen annotatie, los van de radar:
+/// de radar ligt onder de markers, de stip erboven (design review 2026-11,
+/// "Locatie gebruiker valt weg").
+final class StipAnnotation: NSObject, MKAnnotation {
+    let coordinate: CLLocationCoordinate2D
+    init(_ c: CLLocationCoordinate2D) { coordinate = c }
+}
+
 /// CARTO Positron tile-overlay die de aanvragen over de subdomeinen a/b/c/d
 /// spreidt. Eén host throttelt (parallel-verbindingen per host), waardoor
 /// tegels traag of onvolledig laadden; spreiden laadt de kaart sneller én vol.
@@ -67,6 +75,10 @@ struct BuurtMapView: UIViewRepresentable {
     /// Bumpt bij elke programmatische camerawijziging; zo zetten we de regio
     /// alleen dán, en vechten we niet met het pannen/zoomen van de gebruiker.
     var regionVersion: Int
+    /// Tik op een leeg stuk kaart (niet op een marker).
+    var onKaartTik: () -> Void = {}
+    /// Tik op een marker (na het zetten van de selectie).
+    var onMarkerTik: () -> Void = {}
 
     func makeUIView(context: Context) -> MKMapView {
         let map = MKMapView()
@@ -94,11 +106,19 @@ struct BuurtMapView: UIViewRepresentable {
         context.coordinator.lastVersion = regionVersion
 
         map.addAnnotation(HomeAnnotation(homeCoordinate))
+        map.addAnnotation(StipAnnotation(homeCoordinate))
         context.coordinator.syncItems(map: map, items: items)
+
+        let tik = UITapGestureRecognizer(target: context.coordinator,
+                                         action: #selector(Coordinator.kaartGetikt(_:)))
+        tik.delegate = context.coordinator
+        tik.cancelsTouchesInView = false
+        map.addGestureRecognizer(tik)
         return map
     }
 
     func updateUIView(_ map: MKMapView, context: Context) {
+        context.coordinator.parent = self
         if regionVersion != context.coordinator.lastVersion {
             context.coordinator.lastVersion = regionVersion
             // Rustige ease-out naar de marker, maar wat vlotter dan voorheen.
@@ -113,6 +133,8 @@ struct BuurtMapView: UIViewRepresentable {
             || home.coordinate.longitude != homeCoordinate.longitude {
             map.removeAnnotation(home)
             map.addAnnotation(HomeAnnotation(homeCoordinate))
+            map.annotations.compactMap { $0 as? StipAnnotation }.forEach { map.removeAnnotation($0) }
+            map.addAnnotation(StipAnnotation(homeCoordinate))
         }
 
         context.coordinator.syncItems(map: map, items: items)
@@ -121,7 +143,7 @@ struct BuurtMapView: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
-    final class Coordinator: NSObject, MKMapViewDelegate {
+    final class Coordinator: NSObject, MKMapViewDelegate, UIGestureRecognizerDelegate {
         var parent: BuurtMapView
         var lastVersion: Int = -1
         var lastSelectedID: UUID?
@@ -188,41 +210,8 @@ struct BuurtMapView: UIViewRepresentable {
                 radar.configure(color: UIColor(BuurtMapView.jijBlauw), ringCount: 3, duration: 2.7, sterk: true)
                 container.addSubview(radar)
 
-                // Vaste lichtblauwe halo om de stip, zoals in kaart-apps.
-                let haloSize: CGFloat = 46
-                let halo = UIView(frame: CGRect(x: (size - haloSize) / 2, y: (size - haloSize) / 2,
-                                                width: haloSize, height: haloSize))
-                halo.backgroundColor = UIColor(BuurtMapView.jijBlauw).withAlphaComponent(0.22)
-                halo.layer.cornerRadius = haloSize / 2
-                halo.layer.borderColor = UIColor(BuurtMapView.jijBlauw).withAlphaComponent(0.45).cgColor
-                halo.layer.borderWidth = 1
-                halo.isUserInteractionEnabled = false
-                // De halo ademt mee: zo zie je ook in één oogopslag dat dit live is.
-                let adem = CABasicAnimation(keyPath: "transform.scale")
-                adem.fromValue = 0.85
-                adem.toValue = 1.15
-                adem.duration = 1.35
-                adem.autoreverses = true
-                adem.repeatCount = .infinity
-                adem.isRemovedOnCompletion = false
-                adem.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                halo.layer.add(adem, forKey: "adem")
-                container.addSubview(halo)
-
-                // Vaste blauwe stip in het midden: dít is jouw locatie.
-                let dotSize: CGFloat = 20
-                let dot = UIView(frame: CGRect(x: (size - dotSize) / 2, y: (size - dotSize) / 2,
-                                               width: dotSize, height: dotSize))
-                dot.backgroundColor = UIColor(BuurtMapView.jijBlauw)
-                dot.layer.cornerRadius = dotSize / 2
-                dot.layer.borderColor = UIColor.white.cgColor
-                dot.layer.borderWidth = 2.5
-                dot.layer.shadowColor = UIColor.black.cgColor
-                dot.layer.shadowOpacity = 0.25
-                dot.layer.shadowRadius = 2
-                dot.layer.shadowOffset = CGSize(width: 0, height: 1)
-                dot.isUserInteractionEnabled = false
-                container.addSubview(dot)
+                // De stip en zijn halo staan in een eigen annotatie (StipAnnotation)
+                // bóven de markers; hier blijft alleen de radar eronder.
 
                 v.frame = container.bounds
                 v.addSubview(container)
@@ -230,6 +219,14 @@ struct BuurtMapView: UIViewRepresentable {
                 // De radar ligt onder de markers, zodat die helder blijven.
                 v.zPriority = .min
                 v.layer.zPosition = -1000
+                return v
+            }
+
+            if annotation is StipAnnotation {
+                let id = "stip"
+                let v = (mapView.dequeueReusableAnnotationView(withIdentifier: id) as? StipView)
+                    ?? StipView(annotation: annotation, reuseIdentifier: id)
+                v.annotation = annotation
                 return v
             }
 
@@ -271,7 +268,27 @@ struct BuurtMapView: UIViewRepresentable {
             if let item = view.annotation as? ItemAnnotation {
                 parent.selectedItemID = item.id
                 mapView.deselectAnnotation(view.annotation, animated: false)
+                parent.onMarkerTik()
             }
+        }
+
+        // MARK: Tik op lege kaart
+
+        @objc func kaartGetikt(_ g: UITapGestureRecognizer) {
+            parent.onKaartTik()
+        }
+
+        func gestureRecognizer(_ g: UIGestureRecognizer,
+                               shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
+
+        /// Een tik op een marker (of de stip) telt niet als tik op de kaart.
+        func gestureRecognizer(_ g: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            var v = touch.view
+            while let x = v {
+                if x is MKAnnotationView { return false }
+                v = x.superview
+            }
+            return true
         }
 
         @MainActor
@@ -290,6 +307,75 @@ struct BuurtMapView: UIViewRepresentable {
 /// zuidelijker (lager op het scherm) gele marker vóór de geselecteerde groene kan
 /// komen. Door de zPosition in `layoutSubviews` te herhalen, blijft de
 /// geselecteerde marker altijd bovenop.
+/// "Jij bent hier": blauwe stip met witte rand in een zacht ademende halo,
+/// zoals de locatiestip in iOS-kaarten. Ligt altijd bovenop de markers.
+/// Figma: stip 16, witte rand 22, halo 44.
+final class StipView: MKAnnotationView {
+    private let halo = AdemHaloView(frame: CGRect(x: 0, y: 0, width: 44, height: 44))
+    private let rand = UIView(frame: CGRect(x: 11, y: 11, width: 22, height: 22))
+    private let stip = UIView(frame: CGRect(x: 14, y: 14, width: 16, height: 16))
+
+    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
+        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        frame = CGRect(x: 0, y: 0, width: 44, height: 44)
+        canShowCallout = false
+        isEnabled = false
+        let blauw = UIColor(BuurtMapView.jijBlauw)
+        halo.backgroundColor = blauw.withAlphaComponent(0.22)
+        halo.layer.cornerRadius = 22
+        halo.layer.borderColor = blauw.withAlphaComponent(0.45).cgColor
+        halo.layer.borderWidth = 1
+        rand.backgroundColor = .white
+        rand.layer.cornerRadius = 11
+        rand.layer.shadowColor = UIColor.black.cgColor
+        rand.layer.shadowOpacity = 0.25
+        rand.layer.shadowRadius = 2
+        rand.layer.shadowOffset = CGSize(width: 0, height: 1)
+        stip.backgroundColor = blauw
+        stip.layer.cornerRadius = 8
+        [halo, rand, stip].forEach { $0.isUserInteractionEnabled = false; addSubview($0) }
+        zPriority = .max
+        centerOffset = .zero
+    }
+
+    required init?(coder: NSCoder) { super.init(coder: coder) }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // MapKit hersorteert per layout; de stip blijft boven de geselecteerde marker (1000).
+        layer.zPosition = 2000
+    }
+}
+
+/// Halo die zacht in- en uitademt. Herstart zijn animatie bij terugkomst in
+/// beeld of uit de achtergrond: CoreAnimation gooit die anders weg.
+final class AdemHaloView: UIView {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        NotificationCenter.default.addObserver(self, selector: #selector(start),
+                                               name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
+    required init?(coder: NSCoder) { super.init(coder: coder) }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window != nil { start() }
+    }
+
+    @objc private func start() {
+        layer.removeAnimation(forKey: "adem")
+        let adem = CABasicAnimation(keyPath: "transform.scale")
+        adem.fromValue = 0.8
+        adem.toValue = 1.2
+        adem.duration = 1.35
+        adem.autoreverses = true
+        adem.repeatCount = .infinity
+        adem.isRemovedOnCompletion = false
+        adem.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        layer.add(adem, forKey: "adem")
+    }
+}
+
 final class ItemPinView: MKAnnotationView {
     var keepInFront = false
 

@@ -112,7 +112,8 @@ Testharnas (alleen DEBUG), als launch-argumenten bij `xcrun simctl launch`:
 - De buurt-kaart centreert met offset −0.0015 lat en span 0.009, zodat de
   actieve marker net boven het midden valt. Groter = hoger. Bij vaste plekken
   staan jij én de dichtstbijzijnde plek in beeld (`BuurtView.regioMet`).
-- ⚠️ De radar om je locatie ligt onder de markers (`zPriority = .min`) en
+- ⚠️ De radar om je locatie ligt onder de markers (`zPriority = .min`); de stip
+  zelf is een aparte `StipAnnotation` erboven. De radar en
   `PulseHostView` herstart zijn animatie bij `didMoveToWindow` en bij terugkomst
   uit de achtergrond. Haal dat niet weg: CoreAnimation gooit animaties dan weg.
 - ⚠️ Een nieuwe home-tegel of statuskaart hoort bij een onderdeel in
