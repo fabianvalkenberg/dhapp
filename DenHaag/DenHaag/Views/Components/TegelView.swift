@@ -23,8 +23,11 @@ struct TegelView: View {
     var action: (() -> Void)? = nil
 
     private var illustrationSize: CGFloat { compact ? 54 : 70 }
-    private var minHeight: CGFloat { compact ? 140 : 166 }
+    /// Illustratievak: altijd even groot, zodat iconen op één lijn staan.
+    private var illustrationHeight: CGFloat { (illustrationSize * 0.93).rounded() }
+    private var tileHeight: CGFloat { compact ? 140 : 166 }
     private var titleSize: CGFloat { compact ? 16 : 18 }
+    private var padding: CGFloat { compact ? 16 : 24 }
 
     var body: some View {
         Group {
@@ -37,8 +40,12 @@ struct TegelView: View {
         }
     }
 
+    /// Design review 2026-11 ("Tiles uitlijning"): vaste opbouw van boven naar
+    /// beneden, zodat elke tegel even hoog is en iconen en labels per rij op
+    /// één lijn staan. Illustratie in een vast vak bovenin, label in een vak
+    /// van max. twee regels direct eronder; de tegel zelf is vast 166 hoog.
     private var content: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
             // Een naam met "sf:"-prefix valt terug op een SF Symbol (voor tegels
             // zonder eigen illustratie, zoals "Naar de bieb"); anders een asset.
             Group {
@@ -52,18 +59,20 @@ struct TegelView: View {
                         .scaledToFit()
                 }
             }
-            .frame(width: illustrationSize, height: illustrationSize * 0.93)
+            .frame(width: illustrationSize, height: illustrationHeight)
 
             Text(title)
                 .font(AppFont.theSans(size: titleSize, weight: .bold))
                 .foregroundColor(isSelected ? .white : AppColors.darkGrey)
                 .multilineTextAlignment(.center)
-                .lineSpacing(1)
+                .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
         }
+        .padding(.horizontal, padding)
+        .padding(.top, padding)
         .frame(maxWidth: .infinity)
-        .padding(24)
-        .frame(minHeight: minHeight)
+        .frame(height: tileHeight, alignment: .top)
         .background(isSelected ? AppColors.groen3 : AppColors.warmGrijs)
         .clipShape(RoundedRectangle(cornerRadius: 3))
         .overlay(
