@@ -1,0 +1,13 @@
+{
+  "name": "dh-app-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Genereert een testverslag-dashboard uit de Firestore-analytics van de DH App.",
+  "scripts": {
+    "report": "node generate.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

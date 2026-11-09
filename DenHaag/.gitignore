@@ -1,0 +1,11 @@
+# Xcode
+*.xcodeproj/
+xcuserdata/
+DerivedData/
+*.xcworkspace/
+
+# API Keys - NEVER commit
+DenHaag/Services/APIConfig.swift
+
+# OS
+.DS_Store

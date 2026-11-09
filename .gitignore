@@ -1,0 +1,15 @@
+
+node_modules
+.env*
+.next
+.vercel
+
+# Xcode
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+.build/
+.swiftpm/
+Pods/
+.DS_Store

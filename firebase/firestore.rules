@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Onboarding-sessies: de app mag (zonder login) nieuwe records aanmaken,
+    // maar niets teruglezen of wijzigen. Inzien gebeurt via de console.
+    match /onboarding_sessions/{sessionId} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+    // Testsessies (analytics): de app maakt het sessie-document aan en werkt het
+    // bij (naam, voorkeuren, feedback, einde/duur, tellingen). Events eronder
+    // zijn append-only. Lezen/verwijderen kan niet vanuit de app — inzien gebeurt
+    // via de console of een dashboard met service-account.
+    match /sessions/{sessionId} {
+      allow create, update: if true;
+      allow read, delete: if false;
+      match /events/{eventId} {
+        allow create: if true;
+        allow read, update, delete: if false;
+      }
+    }
+    // Al het andere is dicht.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

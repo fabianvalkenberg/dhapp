@@ -1,0 +1,75 @@
+name: DenHaag
+options:
+  bundleIdPrefix: nl.denhaag
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.2"
+settings:
+  SWIFT_VERSION: "5.9"
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    from: "11.0.0"
+targets:
+  DenHaag:
+    type: application
+    platform: iOS
+    dependencies:
+      - package: Firebase
+        product: FirebaseFirestore
+    sources:
+      - path: DenHaag
+        excludes:
+          - Resources/Icons/**
+          - Resources/Images/**
+          - GoogleService-Info.plist
+      - path: DenHaag/GoogleService-Info.plist
+        buildPhase: resources
+      - path: DenHaag/Resources/Fonts
+        buildPhase: resources
+        type: folder
+      - path: DenHaag/Resources/Video
+        buildPhase: resources
+    resources:
+      - path: DenHaag/Assets.xcassets
+        buildPhase: resources
+    info:
+      path: DenHaag/Info.plist
+      properties:
+        UILaunchScreen:
+          UIColorName: ""
+        UIAppFonts:
+          - TheSansC4s-3_Light.otf
+          - TheSansC4s-3iLightItalic.otf
+          - TheSansC4s-4_SemiLight.otf
+          - TheSansC4s-5_Plain.otf
+          - TheSansC4s-5iPlainItalic.otf
+          - TheSansC4s-6_SemiBold.otf
+          - TheSansC4s-6iSemiBoldIta.otf
+          - TheSansC4s-7_Bold.otf
+          - TheSansC4s-7iBoldItalic.otf
+          - TheSansC4s-8_ExtraBold.otf
+          - TheSansC4s-8iExtraBoldIta.otf
+          - TheMixB W5 Plain.otf
+          - TheMixB W6 SemiBold.otf
+          - TheMixB W7 Bold.otf
+          - TheMixB W8 ExtraBold.otf
+        UIRequiresFullScreen: true
+        ITSAppUsesNonExemptEncryption: false
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSMicrophoneUsageDescription: "Den Haag gebruikt je microfoon voor spraakherkenning zodat je je vraag kunt inspreken."
+        NSSpeechRecognitionUsageDescription: "Den Haag gebruikt spraakherkenning om je gesproken vraag om te zetten naar tekst."
+    settings:
+      INFOPLIST_FILE: DenHaag/Info.plist
+      GENERATE_INFOPLIST_FILE: false
+      PRODUCT_BUNDLE_IDENTIFIER: nl.denhaag.app
+      PRODUCT_NAME: Den Haag
+      MARKETING_VERSION: "1.0.0"
+      CURRENT_PROJECT_VERSION: 21
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      CODE_SIGN_STYLE: Automatic
+      DEVELOPMENT_TEAM: CG45GL54TR
+      TARGETED_DEVICE_FAMILY: 1
+      SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+      SUPPORTS_MACCATALYST: false

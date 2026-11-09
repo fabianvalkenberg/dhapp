@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Den Haag gebruikt je microfoon voor spraakherkenning zodat je je vraag kunt inspreken.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Den Haag gebruikt spraakherkenning om je gesproken vraag om te zetten naar tekst.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>TheSansC4s-3_Light.otf</string>
+		<string>TheSansC4s-3iLightItalic.otf</string>
+		<string>TheSansC4s-4_SemiLight.otf</string>
+		<string>TheSansC4s-5_Plain.otf</string>
+		<string>TheSansC4s-5iPlainItalic.otf</string>
+		<string>TheSansC4s-6_SemiBold.otf</string>
+		<string>TheSansC4s-6iSemiBoldIta.otf</string>
+		<string>TheSansC4s-7_Bold.otf</string>
+		<string>TheSansC4s-7iBoldItalic.otf</string>
+		<string>TheSansC4s-8_ExtraBold.otf</string>
+		<string>TheSansC4s-8iExtraBoldIta.otf</string>
+		<string>TheMixB W5 Plain.otf</string>
+		<string>TheMixB W6 SemiBold.otf</string>
+		<string>TheMixB W7 Bold.otf</string>
+		<string>TheMixB W8 ExtraBold.otf</string>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string></string>
+	</dict>
+	<key>UIRequiresFullScreen</key>
+	<true/>
+</dict>
+</plist>
