@@ -452,3 +452,11 @@ illustraties, Kosten, Goed om te weten en de twee knoppen.
 - "Meer informatie" opent denhaag.nl, pagina paspoort voor volwassene aanvragen.
 - Twee tips uit de oude versie (10 jaar geldig, oude paspoort meenemen) zijn
   weg, zoals in Figma. Tips staan nu in je-vorm.
+
+## 2026-11-10 · Pulsering om je locatie subtieler
+
+Fabian vond de blauwe pulsering te fel. De radar heeft nu twee ringen in plaats
+van drie, loopt trager (3,2 s), reikt minder ver (150 i.p.v. 170) en is ongeveer
+half zo fel (`PulseHostView.configure(…, intensiteit: 0.55)`). De ademende halo
+om de stip beweegt minder (0,9–1,1) en is lichter. Bij nul intensiteit
+verdween de radar vrijwel, dat was te veel.

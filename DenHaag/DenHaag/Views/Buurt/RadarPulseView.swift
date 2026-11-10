@@ -14,19 +14,24 @@ final class PulseHostView: UIView {
     private var ringCount = 3
     private var duration: Double = 2.6
     private var sterk = false
+    /// 0…1: hoe fel de sterke variant is (1 = zoals voorheen).
+    private var intensiteit: CGFloat = 1
     private var started = false
 
     private var fillAlpha: CGFloat = 0.12
     private var strokeAlpha: CGFloat = 0.32
 
-    /// `sterk`: volle, levendige ringen voor de eigen locatie.
-    func configure(color: UIColor, ringCount: Int, duration: Double, sterk: Bool = false) {
+    /// `sterk`: volle, levendige ringen voor de eigen locatie. `intensiteit`
+    /// dempt die sterke variant (1 = vol, 0.5 = half zo fel).
+    func configure(color: UIColor, ringCount: Int, duration: Double, sterk: Bool = false,
+                   intensiteit: CGFloat = 1) {
         self.pulseColor = color
         self.ringCount = ringCount
         self.duration = duration
         self.sterk = sterk
-        fillAlpha = sterk ? 0.24 : 0.12
-        strokeAlpha = sterk ? 0.9 : 0.32
+        self.intensiteit = intensiteit
+        fillAlpha = sterk ? 0.24 * intensiteit : 0.12
+        strokeAlpha = sterk ? 0.9 * intensiteit : 0.32
         if started { herstart() }
     }
 
@@ -72,7 +77,7 @@ final class PulseHostView: UIView {
             ring.position = center
             ring.fillColor = pulseColor.withAlphaComponent(fillAlpha).cgColor
             ring.strokeColor = pulseColor.withAlphaComponent(strokeAlpha).cgColor
-            ring.lineWidth = sterk ? 2 : 1.5
+            ring.lineWidth = sterk && intensiteit >= 1 ? 2 : 1.5
             ring.opacity = 0
             layer.addSublayer(ring)
             ringLayers.append(ring)
@@ -84,7 +89,8 @@ final class PulseHostView: UIView {
             // Sterk: helder beginnen en pas in de laatste fase uitdoven, zodat je
             // de ring echt ziet uitdijen.
             let opacity = CAKeyframeAnimation(keyPath: "opacity")
-            opacity.values = sterk ? [0.0, 1.0, 0.7, 0.0] : [0.5, 0.0]
+            let piek = Double(intensiteit)
+            opacity.values = sterk ? [0.0, piek, piek * 0.7, 0.0] : [0.5, 0.0]
             opacity.keyTimes = sterk ? [0, 0.08, 0.55, 1] : [0, 1]
 
             let group = CAAnimationGroup()

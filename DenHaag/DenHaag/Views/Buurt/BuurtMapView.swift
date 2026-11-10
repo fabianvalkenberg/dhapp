@@ -198,7 +198,8 @@ struct BuurtMapView: UIViewRepresentable {
                 v.isEnabled = false
                 v.subviews.forEach { $0.removeFromSuperview() }
 
-                let size: CGFloat = 170
+                // Iets kleiner bereik dan voorheen (was 170): de pulsering was te fel.
+                let size: CGFloat = 150
                 let container = UIView(frame: CGRect(x: 0, y: 0, width: size, height: size))
                 container.isUserInteractionEnabled = false
 
@@ -206,8 +207,10 @@ struct BuurtMapView: UIViewRepresentable {
                 // (langere duur + sterkere ease-out) dan voorheen.
                 let radar = PulseHostView(frame: container.bounds)
                 radar.backgroundColor = .clear
-                // Blauw en duidelijker pulserend: dit ben jij.
-                radar.configure(color: UIColor(BuurtMapView.jijBlauw), ringCount: 3, duration: 2.7, sterk: true)
+                // Subtielere pulsering (2026-11-10): twee ringen, trager en ongeveer
+                // half zo fel als eerst. De stip (StipView) wijst je al aan.
+                radar.configure(color: UIColor(BuurtMapView.jijBlauw), ringCount: 2, duration: 3.2,
+                                sterk: true, intensiteit: 0.55)
                 container.addSubview(radar)
 
                 // De stip en zijn halo staan in een eigen annotatie (StipAnnotation)
@@ -321,9 +324,9 @@ final class StipView: MKAnnotationView {
         canShowCallout = false
         isEnabled = false
         let blauw = UIColor(BuurtMapView.jijBlauw)
-        halo.backgroundColor = blauw.withAlphaComponent(0.22)
+        halo.backgroundColor = blauw.withAlphaComponent(0.16)
         halo.layer.cornerRadius = 22
-        halo.layer.borderColor = blauw.withAlphaComponent(0.45).cgColor
+        halo.layer.borderColor = blauw.withAlphaComponent(0.3).cgColor
         halo.layer.borderWidth = 1
         rand.backgroundColor = .white
         rand.layer.cornerRadius = 11
@@ -365,9 +368,9 @@ final class AdemHaloView: UIView {
     @objc private func start() {
         layer.removeAnimation(forKey: "adem")
         let adem = CABasicAnimation(keyPath: "transform.scale")
-        adem.fromValue = 0.8
-        adem.toValue = 1.2
-        adem.duration = 1.35
+        adem.fromValue = 0.9
+        adem.toValue = 1.1
+        adem.duration = 1.8
         adem.autoreverses = true
         adem.repeatCount = .infinity
         adem.isRemovedOnCompletion = false
