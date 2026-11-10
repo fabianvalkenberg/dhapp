@@ -192,7 +192,7 @@ knop-actie en op de cover-dismiss), niet nog een hypothese.
 
 `Models/AppVersie.swift` is de enige plek die bepaalt wat een versie toont.
 V1 = melden + fietsen. V2 = V1 + voor-jou-kop, afval, parkeren, zwemmen,
-afspraken, personalisatie. V3 = alles behalve notificaties. "Prototype testen"
+afspraken, personalisatie (en sinds 2026-11-10 buurtleven en meedenken). V3 = alles behalve notificaties. "Prototype testen"
 is geen opvolger maar een eigen selectie voor gebruikerstests (melden, fietsen,
 parkeren, zwemmen, afspraken, voor jou, personalisatie, regelen, en sinds
 2026-11-04 ook buurtleven en participatie).
@@ -524,3 +524,25 @@ Pas groot tonen (donker, helderheid omhoog, tik om te sluiten) bestond al.
 - Het Dappre-icoon (`fp-dappre`) is een 1x-export uit Figma en dus iets zacht.
 - De code van deze flow is geschreven door DeepSeek (via OpenModel) op een
   opdracht van Claude, en door Claude gecontroleerd, gebouwd en getest.
+
+## 2026-11-10 · Versie 2 krijgt de gevulde buurtkaart
+
+Bug uit Figma ("Fix", node 5438-42018 in het DH App-designbestand): in Versie 2
+stond op de buurtkaart alleen de filtertag "Fiets stallen". Oorzaak: Versie 2
+had de onderdelen buurtleven en meedenken niet, dus vielen evenementen, sport,
+werk aan de weg, bouwplannen en meedenken weg, en daarmee ook "Alles".
+
+Fix: `buurtLeven` en `participatie` zitten nu in Versie 2 (`AppVersie`). Daardoor
+staat "Alles" standaard aan, staat "Fiets stallen" als extra tag in dezelfde rij
+en toont elke tag alleen zijn eigen markers. Header, onderbalk en de knoppen
+Lijst en Verberg zijn niet aangeraakt.
+
+**Bijeffecten, bewust meegenomen:** het versie-overzicht noemt "Buurtnieuws op
+de kaart" en "Meedenken in de buurt" nu bij Versie 2 in plaats van bij Versie 3,
+en de onboarding vanuit het profiel krijgt in Versie 2 de stap met
+buurtonderwerpen. De vaste tegels van Versie 2 veranderen niet.
+
+**Filtericoon:** het icoon links hoort bij de stallingen (fietstype,
+openingstijden, voorzieningen) en staat er zodra "Fiets stallen" aan staat, net
+als in de testversie. Bij "Alles" staat het er niet.
+
