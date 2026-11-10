@@ -295,6 +295,12 @@ struct MainTabView: View {
                 default: break
                 }
             }
+            // `-buurtfilter <onderwerp>` opent Buurt met dat filter (bijv. fietsparkeren).
+            if let i = ProcessInfo.processInfo.arguments.firstIndex(of: "-buurtfilter"),
+               i + 1 < ProcessInfo.processInfo.arguments.count {
+                buurtFilter = ProcessInfo.processInfo.arguments[i + 1]
+                selectedTab = .buurt
+            }
             // `-scherm <naam>` opent direct een detailscherm (voor screenshots).
             if let i = ProcessInfo.processInfo.arguments.firstIndex(of: "-scherm"),
                i + 1 < ProcessInfo.processInfo.arguments.count {

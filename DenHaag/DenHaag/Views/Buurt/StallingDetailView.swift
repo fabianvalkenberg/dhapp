@@ -4,8 +4,8 @@ import SwiftUI
 /// review 2026-11, "Geen detailpagina stalling": het kaartje liet maar een deel
 /// zien en de voorzieningen liepen af. Opbouw zoals het zwembaddetail.
 ///
-/// "Geschikt voor" (fiets, bakfiets, …) uit Figma staat er bewust niet in: die
-/// gegevens per stalling hebben we niet, en feiten over plekken verzinnen we niet.
+/// "Geschikt voor" en de extra voorzieningen komen uit `StallingFeiten`
+/// (opgezocht bij Biesieklette); wat niet bekend is, staat er niet.
 struct StallingDetailView: View {
     let item: NeighbourhoodItem
     let plek: KaartPlek
@@ -21,6 +21,7 @@ struct StallingDetailView: View {
                     VStack(alignment: .leading, spacing: 32) {
                         adresEnStatus
                         if !voorzieningen.isEmpty { voorzieningenSectie }
+                        if !geschiktVoor.isEmpty { geschiktSectie }
                         openingstijden
                     }
                     .padding(.horizontal, ZwStijl.pad)
@@ -97,10 +98,13 @@ struct StallingDetailView: View {
     private var voorzieningen: [(icoon: String, tekst: String)] {
         var lijst: [(String, String)] = []
         if plek.firstDayFree { lijst.append(("gift", lang.t("fiets_first_day_free"))) }
-        for e in plek.extras {
+        for e in StallingFilter.voorzieningen(plek) {
             let icoon: String
             switch e.lowercased() {
+            case let x where x.contains("toegankelijk") || x.contains("rolstoel"): icoon = "figure.roll"
             case let x where x.contains("toilet"): icoon = "toilet"
+            case let x where x.contains("bewaakt"): icoon = "checkmark.shield"
+            case let x where x.contains("postnl"): icoon = "shippingbox"
             case let x where x.contains("opladen") || x.contains("laad"): icoon = "bolt"
             case let x where x.contains("kluis"): icoon = "lock"
             case let x where x.contains("lamp"): icoon = "lightbulb"
@@ -126,6 +130,32 @@ struct StallingDetailView: View {
                             .font(ZwStijl.tekst)
                             .foregroundColor(AppColors.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+        }
+    }
+
+    // MARK: Geschikt voor
+
+    private var geschiktVoor: [FietspasType] {
+        [.fiets, .fatbike, .bakfiets, .voordrager].filter { StallingFilter.geschikt(plek, voor: $0) == true }
+    }
+
+    /// Figma: twee kolommen met het gekleurde voertuig-icoon van de fietspas.
+    private var geschiktSectie: some View {
+        ZwSectie(titel: lang.t("sf_geschikt_voor")) {
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())],
+                      alignment: .leading, spacing: 0) {
+                ForEach(geschiktVoor) { t in
+                    HStack(spacing: 12) {
+                        Image(t.icoon).renderingMode(.template).resizable().scaledToFit()
+                            .foregroundColor(t.kleur)
+                            .frame(width: 36, height: 24)
+                        Text(lang.t(t.naamKey))
+                            .font(ZwStijl.tekst)
+                            .foregroundColor(AppColors.textSecondary)
                     }
                     .padding(.vertical, 8)
                 }

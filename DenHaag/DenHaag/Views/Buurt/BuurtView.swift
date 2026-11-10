@@ -14,6 +14,47 @@ struct BuurtView: View {
     enum Weergave { case kaart, kaartjes, lijst }
     @State private var weergave: Weergave = .kaart
 
+    /// Filters voor stallingen (Figma fietsen, flow 01). Het fietstype wordt
+    /// onthouden; zonder eerdere keuze volgt het je fietspassen.
+    @State private var stallingFilter = StallingFilter()
+    @State private var toonStallingFilters = false
+    @AppStorage("stallingFietstypen") private var opgeslagenTypen = ""
+
+    private var stallingFilterActief: Bool { effectiveFilter == "fietsparkeren" }
+
+    /// Fietstypen uit je opgeslagen fietspassen die in het filter voorkomen.
+    private var typenUitPassen: Set<FietspasType> {
+        guard let data = UserDefaults.standard.data(forKey: FietspasStore.key),
+              let passen = try? JSONDecoder().decode([Fietspas].self, from: data) else { return [] }
+        return Set(passen.map(\.type)).intersection(StallingFilter.typen)
+    }
+
+    private func laadFietstypen() {
+        if opgeslagenTypen.isEmpty {
+            // Een gewone fiets past overal; alleen afwijkende types voorselecteren.
+            stallingFilter.fietstypen = typenUitPassen.subtracting([.fiets])
+        } else if opgeslagenTypen != "-" {
+            stallingFilter.fietstypen = Set(opgeslagenTypen.split(separator: ",").compactMap { FietspasType(rawValue: String($0)) })
+        }
+    }
+
+    private func pasFilterToe(_ f: StallingFilter) {
+        stallingFilter = f
+        // "-" = bewust niets gekozen; dan niet opnieuw voorselecteren.
+        opgeslagenTypen = f.fietstypen.isEmpty ? "-" : f.fietstypen.map(\.rawValue).sorted().joined(separator: ",")
+        selectedItemID = nil
+        scrolledID = nil
+        if weergave == .kaartjes { weergave = .kaart }
+        // Zorg dat de dichtstbijzijnde stalling die past in beeld staat (de lijst
+        // is al op afstand gesorteerd); anders lijkt de kaart leeg.
+        DispatchQueue.main.async {
+            if let eerste = filteredItems.first {
+                moveCamera(to: Self.regioMet(homeCoordinate, eerste.coordinate))
+            }
+        }
+        AnalyticsService.track("stalling_filter", ["aantal": f.aantalActief])
+    }
+
     /// Vaste volgorde + labels van de buurt-onderwerpen (matcht de onboarding-chips,
     /// afvalkalender staat bewust niet op de kaart).
     static let topicOrder = ["ondernemen", "evenementen", "sport", "wegwerk", "bouwplannen", "participatie", "fietsparkeren", "koffie"]
@@ -118,7 +159,10 @@ struct BuurtView: View {
     private var filteredItems: [NeighbourhoodItem] {
         // "Alles" gaat over wat er speelt in de buurt; vaste plekken horen daar niet bij.
         guard let f = effectiveFilter else { return items.filter { $0.plek == nil } }
-        let lijst = items.filter { $0.topic == f }
+        var lijst = items.filter { $0.topic == f }
+        if f == "fietsparkeren" {
+            lijst = lijst.filter { item in item.plek.map { stallingFilter.past($0) } ?? true }
+        }
         // Vaste plekken (stallingen): dichtstbijzijnde eerst.
         guard Self.plekTopics.contains(f) else { return lijst }
         let thuis = CLLocation(latitude: homeCoordinate.latitude, longitude: homeCoordinate.longitude)
@@ -221,6 +265,7 @@ struct BuurtView: View {
             selectFirstPlekIfNeeded()
         }
         .onAppear {
+            laadFietstypen()
             if rol.isOndernemer { moveCamera(to: Self.homeRegion(homeCoordinate)) }
             selectFirstPlekIfNeeded()
         }
@@ -250,6 +295,18 @@ struct BuurtView: View {
         }
         .sheet(isPresented: $showWerkSheet) {
             werkSheet
+        }
+        .sheet(isPresented: $toonStallingFilters) {
+            StallingFilterView(
+                stallingen: items.compactMap { $0.topic == "fietsparkeren" ? $0.plek : nil },
+                // Alleen wat we op basis van je passen voorselecteren (geen gewone fiets).
+                uitPassen: typenUitPassen.subtracting([.fiets]),
+                begin: stallingFilter,
+                onToepassen: pasFilterToe
+            )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(24)
         }
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(item: $detailItem) { item in
@@ -336,10 +393,16 @@ struct BuurtView: View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
+                    // Figma fietsen (flow 01): bij Fiets stallen staan de filterknop
+                    // en die chip vooraan, zodat je ze direct ziet.
+                    if stallingFilterActief {
+                        filterKnop.id("filterknop")
+                        chip(topicLabel("fietsparkeren"), "fietsparkeren")
+                    }
                     if !alleenPlekken {
                         chip(lang.t("buurt_filter_all"), nil)
                     }
-                    ForEach(allTopics, id: \.self) { topic in
+                    ForEach(allTopics.filter { !(stallingFilterActief && $0 == "fietsparkeren") }, id: \.self) { topic in
                         chip(topicLabel(topic), topic)
                             .id(topic)
                     }
@@ -354,10 +417,42 @@ struct BuurtView: View {
                 guard let new else { return }
                 // Kort wachten: de koffie-chip bestaat pas ná de filterwissel.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                    withAnimation { proxy.scrollTo(new, anchor: .center) }
+                    withAnimation {
+                        if new == "fietsparkeren" { proxy.scrollTo("filterknop", anchor: .leading) }
+                        else { proxy.scrollTo(new, anchor: .center) }
+                    }
                 }
             }
         }
+    }
+
+    /// Figma (flow 01 scherm 3/7): rond knopje links van de chips, groen met een
+    /// teller als er filters aan staan.
+    private var filterKnop: some View {
+        let n = stallingFilter.aantalActief
+        return Button { toonStallingFilters = true } label: {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(n > 0 ? AppColors.groen4 : AppColors.textPrimary)
+                .frame(width: 43, height: 43)
+                .background(n > 0 ? AppColors.groen1 : Color.white)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(n > 0 ? AppColors.groen4 : AppColors.grijs2, lineWidth: n > 0 ? 1.5 : 1))
+                .overlay(alignment: .topTrailing) {
+                    if n > 0 {
+                        Text("\(n)")
+                            .font(AppFont.theSans(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(minWidth: 20, minHeight: 20)
+                            .background(AppColors.groen4)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                            .offset(x: 5, y: -5)
+                    }
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(lang.t("sf_filters")))
     }
 
     private func chip(_ title: String, _ value: String?) -> some View {
@@ -426,6 +521,9 @@ struct BuurtView: View {
             case .kaart:
                 if !filteredItems.isEmpty {
                     pil(telLabel, icoon: "chevron.up", groen: false) { zet(.kaartjes) }
+                } else if stallingFilterActief && !stallingFilter.isLeeg {
+                    // Figma flow 01 scherm 7: te weinig resultaten → wis filters met één tik.
+                    pil(lang.t("sf_wis_filters"), icoon: "xmark", groen: false) { pasFilterToe(StallingFilter()) }
                 }
                 pil(lang.t("buurt_lijst"), icoon: "list.bullet", groen: true) { zet(.lijst) }
             case .kaartjes:

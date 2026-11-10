@@ -61,7 +61,7 @@ struct OnboardingView: View {
         OnboardChip(id: "ooievaarspas", label: "Ooievaarspas",              tileID: "ooievaarspas",  illustration: nil),
         OnboardChip(id: "rechten",      label: "Waar heb ik recht op",      tileID: "rechten",       illustration: nil),
         OnboardChip(id: "bieb",         label: "Naar de bieb",              tileID: "bieb",          illustration: nil),
-        OnboardChip(id: "fietsparkeren", label: "Fiets parkeren",           tileID: "fietsparkeren", illustration: nil),
+        OnboardChip(id: "fietsparkeren", label: "Fiets stallen",            tileID: "fietsparkeren", illustration: nil),
         OnboardChip(id: "fietspas",     label: "Fietspas",                  tileID: "fietspas",      illustration: nil),
     ]
 
