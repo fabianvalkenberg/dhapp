@@ -41,6 +41,14 @@ UI-teksten en toon: `docs/VOICE.md` · afwegingen zonder besluit:
 `export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`, anders faalt
 `xcodebuild`.
 
+⚠️ Bouwen in een eigen git-worktree: kopieer eerst het ge-gitignorede
+`DenHaag/DenHaag/Services/APIConfig.swift` uit de hoofdmap en draai
+`xcodegen generate`, anders faalt de build op "cannot find 'APIConfig'".
+
+⚠️ Een cloud-sessie heeft geen Xcode: daar kun je code schrijven, maar niet
+bouwen, in de simulator testen of naar TestFlight uploaden. Dat kan alleen op
+deze Mac.
+
 Simulator (compile-check en visuele verificatie, iPhone 17 Pro
 `35221942-7918-4D44-8811-0C7CCE1508BD`, bundle `nl.denhaag.app`):
 
@@ -72,7 +80,12 @@ foutschermen van "pas toevoegen" staan in DECISIONS.md (2026-11-10).
 - ⚠️ TestFlight alleen op expliciet sein "alles is goed". Recept staat in de
   memory-notitie *testflight-deploy*.
 - Gebruik de Figma MCP voor exacte design-specs (file `L55Hzh3QOCKsK4t5elCRcA`;
-  meldflow: `HfvOJp3cD2kSUXPf8Yx3TA`, node 1104-5637).
+  meldflow: `HfvOJp3cD2kSUXPf8Yx3TA`, node 1104-5637). Designers zetten
+  bugs als "Fix"-frame met instructiekaart in "DH App | Design file"
+  (`wvwF4ED2uW2omIH8vYvDSx`); de kaart is de spec, inclusief "niet aanpassen".
+- ⚠️ Gestapelde PR's samenvoegen met merge-commits (geen squash), in
+  stapelvolgorde, telkens eerst de volgende PR op `main` richten. Conflicten in
+  DECISIONS.md zijn meestal twee nieuwe besluiten onderaan: houd beide.
 - ⚠️ Vergelijk met Figma op ware puntgrootte: Figma-screenshot op 1x naast de
   simulator-screenshot gedeeld door 3. Nooit schalen naar 393 breed — dan
   verschuift alles en meet je niets.
@@ -171,9 +184,11 @@ Korte portrait-video's die een onderwerp uitleggen, nu bij kwijtschelding.
       aanpassen op het startscherm ("geen prio"); fietsen-flows 04 (hoe lang
       staat mijn fiets) en 05 (pas blokkeren); Apple Wallet echt koppelen;
       scherp Dappre-icoon aanleveren (`fp-dappre` is een 1x-export).
-- [ ] Ongemergde lokale restanten: branch `fietsen-02-pas-toevoegen` (oude WIP,
-      vervangen door `fietsen-02-passen-toevoegen`) en een lege werkkopie in een
-      tijdelijke map. Opruimen kan, maar alleen met Fabians akkoord.
+- [ ] Lokale restanten: branch `fietsen-02-pas-toevoegen` (oude WIP, vervangen
+      door `fietsen-02-passen-toevoegen`), de bouwbranches `testflight-30/31/32`
+      (zitten al in `main`), twee git-worktrees in `/private/tmp/claude-501/…`
+      en de extra simulators "iPhone 17 Pro Fietsen" en "… Buurtfilters".
+      Opruimen kan, maar alleen met Fabians akkoord.
 - [ ] Microfoon en fotokiezer in de meldflow zijn niet getest (kan niet in de
       simulator). Op het toestel nalopen.
 

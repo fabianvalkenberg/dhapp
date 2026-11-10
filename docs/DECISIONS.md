@@ -572,3 +572,20 @@ Nu gedraagt Versie 2 zich als "Prototype testen": bij elk openen van de app
 begint elke nieuwe deelnemer bij zijn eigen naam. De vlag `naamGevraagdV2`
 wordt niet meer gelezen; een oude waarde op een toestel doet dus niets meer.
 Overslaan geeft nog steeds "Hallo,".
+
+## 2026-11-10 · Alle open PR's samengevoegd; `main` = build 32
+
+Op Fabians sein "voeg maar samen allemaal" zijn PR #1 t/m #16 in `main`
+gezet. Volgorde: #1–#9, dan #10 en #15 (Versie 2-tak), dan #11–#14
+(fietsen-tak). Steeds met een merge-commit en de volgende PR eerst op `main`
+gericht; squash had elke volgende PR in de stapel laten botsen.
+
+Conflicten zaten alleen in DECISIONS.md en CLAUDE.md: aan beide kanten waren
+besluiten onderaan toegevoegd. Beide gehouden; #16 ruimde de dubbele regels in
+CLAUDE.md op en zette het buildnummer in `project.yml` op 32. Gecontroleerd:
+de code in `main` is gelijk aan die van build 32 op TestFlight.
+
+Het samenvoegen van #16 werd eerst tegengehouden door de automatische
+toestemmingscheck, omdat Fabian die PR nog niet had gezien. Na zijn "ja" wel
+gedaan.
+
