@@ -164,7 +164,7 @@ Korte portrait-video's die een onderwerp uitleggen, nu bij kwijtschelding.
 
 - [ ] **Open PR's, op elkaar gestapeld** (mergen in volgorde): #1 werk 3–4 nov
       → #2–#8 design review → #9 pulsering → #10 Versie 2 standaard (op #9) en
-      fietsen flow 01/02/03 (op #9). De oude lokale branches `main` en
+      fietsen flow 01/02/03 (op #9) → #14 buurtfilters in Versie 2 (op #13). De oude lokale branches `main` en
       `werk-2026-11-07` bevatten een API-sleutel in de geschiedenis: **nooit pushen.**
 - [ ] Nog open uit design review en fietsendesign: tegels zelf ordenen en
       aanpassen op het startscherm ("geen prio"); fietsen-flows 04 (hoe lang
