@@ -34,7 +34,9 @@ enum AppVersie: String, CaseIterable, Identifiable {
     var onderdelen: Set<Onderdeel> {
         switch self {
         case .v1: return [.melden, .fietsen]
-        case .v2: return AppVersie.v1.onderdelen.union([.voorJou, .afval, .parkeren, .zwemmen, .afspraken, .personalisatie])
+        // Sinds 2026-11-10 ook de gevulde buurtkaart, zoals in de testversie:
+        // zonder buurtleven toonde de kaart in versie 2 alleen "Fiets stallen".
+        case .v2: return AppVersie.v1.onderdelen.union([.voorJou, .afval, .parkeren, .zwemmen, .afspraken, .personalisatie, .buurtLeven, .participatie])
         case .v3: return Set(Onderdeel.allCases).subtracting([.notificaties])
         // Testversie: ook de gevulde buurtkaart (werk aan de weg, meedenken, buurtleven).
         case .test: return [.melden, .fietsen, .parkeren, .zwemmen, .afspraken, .voorJou, .personalisatie, .regelen, .buurtLeven, .participatie]

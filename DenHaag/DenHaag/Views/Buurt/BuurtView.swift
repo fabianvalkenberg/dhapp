@@ -121,7 +121,7 @@ struct BuurtView: View {
         }
     }
 
-    /// Zonder buurtnieuws (versie 1 en 2) staan er alleen vaste plekken op de
+    /// Zonder buurtnieuws (versie 1) staan er alleen vaste plekken op de
     /// kaart. "Alles" zou dan leeg zijn, dus valt die chip weg.
     private var alleenPlekken: Bool {
         !items.contains { $0.plek == nil }

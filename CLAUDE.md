@@ -31,8 +31,9 @@ UI-teksten en toon: `docs/VOICE.md` · afwegingen zonder besluit:
 - **Rollen:** inwoner of ondernemer ("Kapsalon Anne", Hoefkade 12) via
   `RolManager`; wisselen door te vegen in de profielkop.
 - **Chat (Regelen):** `Services/ClaudeService.swift`, model `claude-sonnet-5-5`.
-- **Laatste TestFlight-build:** 30, gebouwd vanaf de lokale branch `testflight-30`
-  (PR #13 + #10 samengevoegd; zie memory *testflight-deploy*).
+- **Laatste TestFlight-build:** 31, gebouwd vanaf de lokale branch `testflight-31`
+  (build 30 = PR #13 + #10, plus PR #14 buurtfilters in Versie 2; zie memory
+  *testflight-deploy*).
 
 - **Laatste TestFlight-build:** 32, gebouwd vanaf de lokale branch `testflight-32`
   (build 30 = PR #13 + #10, plus PR #14 buurtfilters en PR #15 naamscherm bij
@@ -168,7 +169,7 @@ Korte portrait-video's die een onderwerp uitleggen, nu bij kwijtschelding.
 
 - [ ] **Open PR's, op elkaar gestapeld** (mergen in volgorde): #1 werk 3–4 nov
       → #2–#8 design review → #9 pulsering → #10 Versie 2 standaard (op #9) en
-      fietsen flow 01/02/03 (op #9). De oude lokale branches `main` en
+      fietsen flow 01/02/03 (op #9) → #14 buurtfilters in Versie 2 (op #13). De oude lokale branches `main` en
       `werk-2026-11-07` bevatten een API-sleutel in de geschiedenis: **nooit pushen.**
 - [ ] Nog open uit design review en fietsendesign: tegels zelf ordenen en
       aanpassen op het startscherm ("geen prio"); fietsen-flows 04 (hoe lang
