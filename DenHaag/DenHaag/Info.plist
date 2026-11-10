@@ -20,6 +20,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Den Haag gebruikt je camera alleen om de QR-code op je fietspas te scannen.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Den Haag gebruikt je microfoon voor spraakherkenning zodat je je vraag kunt inspreken.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

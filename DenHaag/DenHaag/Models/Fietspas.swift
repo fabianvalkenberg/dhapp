@@ -61,6 +61,36 @@ final class FietspasStore: ObservableObject {
 
     func voegToe(_ pas: Fietspas) { passen.append(pas) }
 
+    func verwijder(_ id: UUID) {
+        passen.removeAll { $0.id == id }
+    }
+
+    // MARK: Apple Wallet (nagebootst; los bewaard zodat oude opgeslagen passen blijven werken)
+
+    static let walletKey = "fietspassenInWallet"
+    @Published private(set) var walletCodes: Set<String> =
+        Set(UserDefaults.standard.stringArray(forKey: FietspasStore.walletKey) ?? [])
+
+    func inWallet(_ code: String) -> Bool { walletCodes.contains(code) }
+
+    func zetInWallet(_ code: String, _ aan: Bool) {
+        if aan { walletCodes.insert(code) } else { walletCodes.remove(code) }
+        UserDefaults.standard.set(Array(walletCodes), forKey: Self.walletKey)
+    }
+
+    // MARK: Laatst gebruikt (flow 03: de laatst gebruikte pas staat vooraan)
+
+    static let gebruiktKey = "fietspasLaatstGebruikt"
+
+    func markeerGebruikt(_ id: UUID) {
+        UserDefaults.standard.set(id.uuidString, forKey: Self.gebruiktKey)
+        objectWillChange.send()
+    }
+
+    var laatstGebruiktID: UUID? {
+        UserDefaults.standard.string(forKey: Self.gebruiktKey).flatMap(UUID.init(uuidString:))
+    }
+
     func werkBij(_ pas: Fietspas) {
         guard let i = passen.firstIndex(where: { $0.id == pas.id }) else { return }
         passen[i] = pas
@@ -96,5 +126,12 @@ final class FietspasStore: ObservableObject {
         if let data = try? JSONEncoder().encode(passen) {
             UserDefaults.standard.set(data, forKey: Self.key)
         }
+    }
+}
+
+extension FietspasType {
+    /// Standaardnaam van een pas zonder eigen bijnaam: "Mijn fiets", "Mijn bakfiets".
+    func standaardBijnaam(_ lang: LanguageManager) -> String {
+        String(format: lang.t("fp_bijnaam_standaard"), lang.t(naamKey).lowercased())
     }
 }
