@@ -253,9 +253,15 @@ struct BuurtView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(item: $detailItem) { item in
-            BuurtDetailView(item: item)
-                .toolbar(.hidden, for: .navigationBar)
-                .modifier(ZoomDestination(id: item.id, ns: zoomNS))
+            Group {
+                if let plek = item.plek {
+                    StallingDetailView(item: item, plek: plek)
+                } else {
+                    BuurtDetailView(item: item)
+                }
+            }
+            .toolbar(.hidden, for: .navigationBar)
+            .modifier(ZoomDestination(id: item.id, ns: zoomNS))
         }
         }
     }
@@ -408,18 +414,9 @@ struct BuurtView: View {
         AnalyticsService.track("buurt_weergave", ["weergave": String(describing: w)])
     }
 
+    /// Uit de lijst: altijd naar de detailpagina (buurtnieuws of stalling).
     private func kiesUitLijst(_ item: NeighbourhoodItem) {
-        if item.plek == nil {
-            detailItem = item
-        } else {
-            // Een vaste plek: terug naar de kaart, met dit kaartje open.
-            selectedItemID = item.id
-            scrolledID = item.id
-            zet(.kaartjes)
-            if let i = items.first(where: { $0.id == item.id }) {
-                moveCamera(to: Self.regioMet(homeCoordinate, i.coordinate))
-            }
-        }
+        detailItem = item
     }
 
     @ViewBuilder
@@ -503,12 +500,14 @@ struct BuurtView: View {
         .frame(height: 330)
     }
 
-    /// Een vaste plek heeft geen detailpagina; tikken zoomt alleen naar de pin.
+    /// Tik op een kaartje opent de detailpagina; bij een vaste plek is dat sinds
+    /// de design review de stallingspagina met alle voorzieningen en tijden.
     @ViewBuilder
     private func card(for item: NeighbourhoodItem) -> some View {
         if let plek = item.plek {
             PlekCardView(plek: plek, isKoffie: item.type == .koffie, actief: selectedItemID == item.id)
-                .onTapGesture { selectedItemID = item.id }
+                .modifier(ZoomSource(id: item.id, ns: zoomNS))
+                .onTapGesture { detailItem = item }
         } else {
             BuurtCardView(item: item)
                 // Native zoom-transitie: dit kaartje is de bron.

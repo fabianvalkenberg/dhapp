@@ -405,3 +405,19 @@ witte rand van 22, halo 44.
 hoog, 18 semibold, gekozen in groen1 met een groen4-rand, zonder schaduw, en
 lopen rechts door tot de schermrand (peek). Namen van de onderwerpen zijn niet
 veranderd (Figma toont andere, maar dat is voorbeeldtekst).
+
+## 2026-11-09 · Stallingen: lijst en eigen detailpagina (design review)
+
+"Fiets parkeren: geen lijstweergave" gebruikt dezelfde lijst als Buurt (groen
+fietsblok, open/dicht van vandaag, afstand). "Geen detailpagina stalling":
+`StallingDetailView` met foto, adres + Route, open/dicht, alle voorzieningen
+en de openingstijden van zeven dagen. Bereikbaar vanuit de lijst én door op
+het stallingskaartje te tikken (dat zoomde eerst alleen naar de pin).
+
+**Afwijking van Figma:** het blok "Geschikt voor" (fiets, fatbike, bakfiets,
+voordrager) staat er niet in. Die gegevens hebben we per stalling niet, en
+feiten over plekken verzinnen we niet. Terugzetten zodra ze er zijn.
+"Bewaakt" staat er om dezelfde reden niet bij.
+
+De fietspas zelf is niet aangepast: volgens de review eerst probleem, HKW en
+user story, dan de flow.
