@@ -68,3 +68,21 @@ groen gebleven. **Open:** klopt die lezing?
 - **Werkwijze bij krappe credits:** code laten schrijven door DeepSeek via
   OpenModel (Otto), Claude controleert, bouwt en test. Werkte voor flow 03 in
   één keer; het controleren kost nog steeds de meeste Claude-tokens (screenshots).
+
+## 2026-11-10 · Naamscherm en filtericoon in Versie 2: de opties die het niet werden
+
+**Naamscherm.** Een collega meldde na build 31 dat Versie 2 het naamscherm
+oversloeg (het werd maar één keer per toestel getoond). Twee opties:
+1. Bij elke start, zoals "Prototype testen". Gekozen: bij testen met steeds een
+   nieuwe deelnemer moet iedereen bij zijn eigen naam beginnen.
+2. Eén keer per toestel, en opnieuw als je Versie 2 kiest bij "Versie van de
+   app". Zo kan een tester het zelf resetten, maar je moet het wel weten.
+Open: vragen we de naam ook opnieuw als de app uit de achtergrond terugkomt?
+Nu niet; alleen bij echt opnieuw opstarten.
+
+**Filtericoon op de buurtkaart.** De Fix-kaart zei "het filtericoon links
+blijft staan". Het icoon filtert alleen stallingen, dus het staat er bij
+"Fiets stallen" en niet bij "Alles", zoals in de testversie. Open: als de
+designer het icoon altijd zichtbaar wil, moet eerst duidelijk zijn wat het bij
+"Alles" doet.
+
