@@ -155,15 +155,10 @@ Korte portrait-video's die een onderwerp uitleggen, nu bij kwijtschelding.
 
 ## Open werk
 
-- [ ] **Nog niets gepusht; GitHub-repo `dhapp` is leeg en openbaar.** De oude
-      lokale branches `main` en `werk-2026-11-07` bevatten in de allereerste
-      commit bouwbestanden met de Claude-API-sleutel en bestanden > 100 MB:
-      **nooit pushen.** Schone basis: `main-schoon` (zelfde inhoud, zonder
-      bouwbestanden). Daarop gestapeld: `werk-3-4-november` → `review-hele-app`
-      → `review-home` → `review-onboarding` → `review-buurt` → `review-fietsen`
-      → `review-parkeren-hulp` → `review-afspraak` (design review 2026-11-09,
-      screenshots in `screens/review-2026-11/`). Wacht op Fabians akkoord om
-      `main-schoon` als `main` te pushen.
+- [ ] **Open PR's, op elkaar gestapeld** (mergen in volgorde): #1 werk 3–4 nov
+      → #2–#8 design review → #9 pulsering → #10 Versie 2 standaard (op #9) en
+      fietsen flow 01/02/03 (op #9). De oude lokale branches `main` en
+      `werk-2026-11-07` bevatten een API-sleutel in de geschiedenis: **nooit pushen.**
 - [ ] Design review, nog open: tegels zelf ordenen en aanpassen op het
       startscherm ("geen prio"), fietspas (eerst probleem/HKW/flow), en
       "Geschikt voor" bij stallingen (geen gegevens per stalling).
