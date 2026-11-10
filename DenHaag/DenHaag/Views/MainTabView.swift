@@ -2,6 +2,11 @@ import SwiftUI
 
 struct MainTabView: View {
     @ObservedObject var settings: HomeSettingsModel
+    @EnvironmentObject var versie: VersieManager
+    @EnvironmentObject var berichten: BerichtenStore
+    @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var melding: MeldingStore
+    @EnvironmentObject var rol: RolManager
     @State private var selectedTab: Tab = .home
     @State private var buurtDetailOpen = false
     @State private var showCustomizeSheet = false
@@ -15,6 +20,15 @@ struct MainTabView: View {
     @State private var showKwijtschelding = false
     @State private var showAanvraag = false
     @State private var showPaspoort = false
+    @State private var showFietspas = false
+    @State private var showMelding = false
+    @State private var showBerichten = false
+    @State private var showVergunningen = false
+    @State private var showMeldingStatus = false
+    /// Testversie: bij openen eerst je naam (één keer per sessie en bij wisselen).
+    @State private var vraagNaam = false
+    @StateObject private var fietspassen = FietspasStore()
+    @State private var fietspasVolScherm = false
     /// Onderwerp-filter dat een buurt-snelkoppel-tegel aanvraagt (nil = geen).
     @State private var buurtFilter: String? = nil
     /// Welke info-pagina open is (bieb / rechten); nil = geen.
@@ -60,6 +74,9 @@ struct MainTabView: View {
                     showPaspoort: $showPaspoort,
                     onTile: handleTile
                 )
+                // Opnieuw opbouwen bij een versie- of rolwissel; anders bleven
+                // tegels en kop van de vorige keuze staan.
+                .id("\(versie.current.rawValue)-\(rol.rol.rawValue)")
                 .modifier(TabSlide(offset: tabOffset(.home), active: selectedTab == .home))
 
                 RegelenView(isActive: selectedTab == .regelen)
@@ -76,11 +93,30 @@ struct MainTabView: View {
             .animation(.timingCurve(0.16, 1, 0.3, 1, duration: 0.45), value: selectedTab)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
+            // Mijn fietspassen ligt ónder de tabbalk (Figma C2): de tabs blijven zichtbaar.
+            if showFietspas {
+                MijnFietspassenView(
+                    store: fietspassen,
+                    isPresented: $showFietspas,
+                    verbergTabbalk: $fietspasVolScherm,
+                    onStallingen: {
+                        showFietspas = false
+                        buurtFilter = "fietsparkeren"
+                        selectedTab = .buurt
+                    }
+                )
+                .transition(.move(edge: .bottom))
+                // Vaste laag: zonder zIndex slaat SwiftUI de wegschuif-animatie over.
+                .zIndex(1)
+            }
+
             // Bottom navigation — verdwijnt wanneer het buurt-detail open is.
             BottomTabBar(selectedTab: $selectedTab)
-                .offset(y: buurtDetailOpen ? 160 : 0)
-                .opacity(buurtDetailOpen ? 0 : 1)
+                .offset(y: (buurtDetailOpen || fietspasVolScherm) ? 160 : 0)
+                .opacity((buurtDetailOpen || fietspasVolScherm) ? 0 : 1)
                 .animation(.easeInOut(duration: 0.25), value: buurtDetailOpen)
+                .animation(.easeInOut(duration: 0.25), value: fietspasVolScherm)
+                .zIndex(2)
 
             // Full-screen slide-in overlays (over tab bar)
             if showCustomizeSheet {
@@ -151,6 +187,59 @@ struct MainTabView: View {
                     .zIndex(20)
             }
 
+            if showBerichten {
+                BerichtenView(isPresented: $showBerichten)
+                    .transition(.move(edge: .trailing))
+                    .zIndex(20)
+            }
+
+            if showMeldingStatus {
+                MeldingStatusView(isPresented: $showMeldingStatus) {
+                    showMeldingStatus = false
+                    showMelding = true
+                }
+                .transition(.move(edge: .trailing))
+                .zIndex(20)
+            }
+
+            if showVergunningen {
+                VergunningenPageView(isPresented: $showVergunningen)
+                    .transition(.move(edge: .trailing))
+                    .zIndex(20)
+            }
+
+            // Nagebootste pushmelding, boven alles.
+            if let push = berichten.push {
+                VStack {
+                    PushBannerView(bericht: push) {
+                        withAnimation(.easeInOut(duration: 0.3)) { berichten.push = nil }
+                        berichten.markeerGelezen(push.id)
+                        showMelding = false
+                        showBerichten = true
+                    }
+                    .padding(.top, AppDesign.safeAreaTop - 6)
+                    Spacer()
+                }
+                .ignoresSafeArea(edges: .top)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(30)
+            }
+
+            if showMelding {
+                MeldingView(isPresented: $showMelding) { wat, waar, nummer in
+                    melding.nieuw(wat: wat, waar: waar, nummer: nummer)
+                    // Na een paar tellen "in behandeling" (gelijk met de pushmelding).
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        if melding.laatste.nummer == nummer { melding.laatste.stap = 1 }
+                    }
+                    guard versie.current.heeft(.notificaties) else { return }
+                    berichten.stuur(.meldingen, titel: lang.t("push_melding_titel"),
+                                    tekst: String(format: lang.t("push_melding_tekst"), wat.lowercased(), nummer), na: 5)
+                }
+                    .transition(.move(edge: .trailing))
+                    .zIndex(20)
+            }
+
         }
         .ignoresSafeArea(.keyboard)
         .animation(.easeInOut(duration: 0.35), value: showCustomizeSheet)
@@ -163,14 +252,53 @@ struct MainTabView: View {
         .animation(.easeInOut(duration: 0.35), value: showAanvraag)
         .animation(.easeInOut(duration: 0.35), value: infoKind)
         .animation(.easeInOut(duration: 0.35), value: showPaspoort)
+        .animation(.easeInOut(duration: 0.35), value: showMelding)
+        .animation(.easeInOut(duration: 0.35), value: showFietspas)
+        .animation(.easeInOut(duration: 0.35), value: showBerichten)
+        .animation(.easeInOut(duration: 0.35), value: showVergunningen)
+        .animation(.easeInOut(duration: 0.35), value: showMeldingStatus)
+        .fullScreenCover(isPresented: $vraagNaam) {
+            NaamOnboardingView(settings: settings) { vraagNaam = false }
+                .environmentObject(lang)
+        }
+        .onChange(of: showMelding) { _, v in if v { AnalyticsService.track("open_melding") } }
         .onChange(of: showAanvraag) { _, v in if v { AnalyticsService.track("open_aanvraag") } }
         .onChange(of: showPaspoort) { _, v in if v { AnalyticsService.track("open_paspoort") } }
         .onChange(of: infoKind) { _, v in if let v { AnalyticsService.track("open_info", ["kind": String(describing: v)]) } }
         .fullScreenCover(isPresented: $showOoievaarspas) {
             PasDetailView(pas: .ooievaarspas)
         }
-        .onAppear { AnalyticsService.screen("home") }
+        .onChange(of: showFietspas) { _, v in if v { AnalyticsService.track("open_fietspas") } }
+        .onAppear {
+            AnalyticsService.screen("home")
+            #if DEBUG
+            // Testharnas: `-zwemmen` opent direct de mini-app Zwemmen.
+            if ProcessInfo.processInfo.arguments.contains("-zwemmen") { showZwemmen = true }
+            // `-melding` opent direct de meldflow.
+            if ProcessInfo.processInfo.arguments.contains("-melding") { showMelding = true }
+            // `-fietspas` opent direct Mijn fietspassen.
+            if ProcessInfo.processInfo.arguments.contains("-fietspas") { showFietspas = true }
+            // `-tab buurt` opent direct die tab.
+            if let i = ProcessInfo.processInfo.arguments.firstIndex(of: "-tab"),
+               i + 1 < ProcessInfo.processInfo.arguments.count,
+               ProcessInfo.processInfo.arguments[i + 1] == "buurt" { selectedTab = .buurt }
+            // `-geennaam` slaat de naamvraag van de testversie over.
+            if ProcessInfo.processInfo.arguments.contains("-geennaam") { return }
+            #endif
+            if versie.current.vraagtNaam { vraagNaam = true }
+        }
+        .onChange(of: versie.current) { _, nieuw in
+            // Sta je op een tab die de nieuwe versie niet heeft, dan terug naar home.
+            // Versie gekozen: direct terug naar home, met de tegels van die versie.
+            showSettings = false
+            selectedTab = .home
+            settings.setSelection(ids: PreferenceTile.standaard(voor: nieuw))
+            // Naar de testversie: eerst de naam vragen.
+            if nieuw.vraagtNaam { vraagNaam = true }
+        }
         .onChange(of: selectedTab) { _, t in
+            // Een andere tab kiezen sluit de fietspassen.
+            showFietspas = false
             AnalyticsService.screen(String(describing: t))
             AnalyticsService.track("tab_switch", ["tab": String(describing: t)])
         }
@@ -198,8 +326,8 @@ struct MainTabView: View {
             // op de content de overgang verzorgen (geen dubbele animatie).
             selectedTab = .buurt
         case .overlast:
-            // Melding maken loopt via de Regelen-assistent.
-            selectedTab = .regelen
+            // Melden loopt in elke versie via de meldflow (Figma "prototype MOR '26").
+            showMelding = true
         case .ooievaarspas:
             showOoievaarspas = true
         case .afspraak:
@@ -211,6 +339,17 @@ struct MainTabView: View {
         case .buurtFilter(let topic):
             buurtFilter = topic
             selectedTab = .buurt
+        case .fietsParkeren:
+            buurtFilter = "fietsparkeren"
+            selectedTab = .buurt
+        case .berichten:
+            showBerichten = true
+        case .vergunningen:
+            showVergunningen = true
+        case .meldingStatus:
+            showMeldingStatus = true
+        case .fietspas:
+            showFietspas = true
         }
     }
 }

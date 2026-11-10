@@ -14,12 +14,10 @@ struct AfvalkalenderView: View {
         let highlight: Bool   // eerstvolgende ophaalmoment uitlichten
     }
 
-    private let pickups: [Pickup] = [
-        Pickup(type: "GFT & etensresten", color: Color(hex: "5B8C3E"), date: "Morgen · vr 6 juni", highlight: true),
-        Pickup(type: "Plastic, blik & drinkpakken", color: Color(hex: "E59500"), date: "Di 10 juni", highlight: false),
-        Pickup(type: "Papier & karton", color: AppColors.blauw3, date: "Wo 18 juni", highlight: false),
-        Pickup(type: "Restafval", color: Color(hex: "4B4B4B"), date: "Wo 25 juni", highlight: false),
-    ]
+    /// Uit de gedeelde afvalplanning, zodat "morgen" klopt met de kaart op home.
+    private let pickups: [Pickup] = AfvalPlanning.ophalingen.enumerated().map { i, o in
+        Pickup(type: o.soort, color: o.kleur, date: AfvalPlanning.label(o.datum), highlight: i == 0)
+    }
 
     @State private var reminders: Set<UUID> = []
 

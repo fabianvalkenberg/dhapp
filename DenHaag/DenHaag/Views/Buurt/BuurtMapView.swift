@@ -57,6 +57,9 @@ final class CartoTileOverlay: MKTileOverlay {
 /// Tegels komen van een externe dienst (CARTO/OpenStreetMap) — bewuste keuze
 /// voor de demo. Pins en de pulserende huislocatie worden custom getekend.
 struct BuurtMapView: UIViewRepresentable {
+    /// Kleur van "jij bent hier", zoals de blauwe stip in kaart-apps.
+    static let jijBlauw = Color(hex: "1A73E8")
+
     var items: [NeighbourhoodItem]
     var homeCoordinate: CLLocationCoordinate2D
     @Binding var selectedItemID: UUID?
@@ -173,7 +176,7 @@ struct BuurtMapView: UIViewRepresentable {
                 v.isEnabled = false
                 v.subviews.forEach { $0.removeFromSuperview() }
 
-                let size: CGFloat = 150
+                let size: CGFloat = 170
                 let container = UIView(frame: CGRect(x: 0, y: 0, width: size, height: size))
                 container.isUserInteractionEnabled = false
 
@@ -181,14 +184,36 @@ struct BuurtMapView: UIViewRepresentable {
                 // (langere duur + sterkere ease-out) dan voorheen.
                 let radar = PulseHostView(frame: container.bounds)
                 radar.backgroundColor = .clear
-                radar.configure(color: UIColor(AppColors.groen3), ringCount: 3, duration: 6.5)
+                // Blauw en duidelijker pulserend: dit ben jij.
+                radar.configure(color: UIColor(BuurtMapView.jijBlauw), ringCount: 3, duration: 2.7, sterk: true)
                 container.addSubview(radar)
 
-                // Vast groen stipje in het midden: dít is jouw (thuis)locatie.
-                let dotSize: CGFloat = 16
+                // Vaste lichtblauwe halo om de stip, zoals in kaart-apps.
+                let haloSize: CGFloat = 46
+                let halo = UIView(frame: CGRect(x: (size - haloSize) / 2, y: (size - haloSize) / 2,
+                                                width: haloSize, height: haloSize))
+                halo.backgroundColor = UIColor(BuurtMapView.jijBlauw).withAlphaComponent(0.22)
+                halo.layer.cornerRadius = haloSize / 2
+                halo.layer.borderColor = UIColor(BuurtMapView.jijBlauw).withAlphaComponent(0.45).cgColor
+                halo.layer.borderWidth = 1
+                halo.isUserInteractionEnabled = false
+                // De halo ademt mee: zo zie je ook in één oogopslag dat dit live is.
+                let adem = CABasicAnimation(keyPath: "transform.scale")
+                adem.fromValue = 0.85
+                adem.toValue = 1.15
+                adem.duration = 1.35
+                adem.autoreverses = true
+                adem.repeatCount = .infinity
+                adem.isRemovedOnCompletion = false
+                adem.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                halo.layer.add(adem, forKey: "adem")
+                container.addSubview(halo)
+
+                // Vaste blauwe stip in het midden: dít is jouw locatie.
+                let dotSize: CGFloat = 20
                 let dot = UIView(frame: CGRect(x: (size - dotSize) / 2, y: (size - dotSize) / 2,
                                                width: dotSize, height: dotSize))
-                dot.backgroundColor = UIColor(AppColors.groen3)
+                dot.backgroundColor = UIColor(BuurtMapView.jijBlauw)
                 dot.layer.cornerRadius = dotSize / 2
                 dot.layer.borderColor = UIColor.white.cgColor
                 dot.layer.borderWidth = 2.5
@@ -202,6 +227,9 @@ struct BuurtMapView: UIViewRepresentable {
                 v.frame = container.bounds
                 v.addSubview(container)
                 v.centerOffset = .zero
+                // De radar ligt onder de markers, zodat die helder blijven.
+                v.zPriority = .min
+                v.layer.zPosition = -1000
                 return v
             }
 
@@ -285,12 +313,18 @@ private struct PinGlyph: View {
                     .fill(fill)
                     .frame(width: 36, height: 36)
                     .shadow(color: Color.black.opacity(0.25), radius: 2, x: 0, y: 2)
-                Image(icon)
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 19, height: 19)
-                    .foregroundColor(iconColor)
+                if icon.hasPrefix("sf:") {
+                    Image(systemName: String(icon.dropFirst(3)))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(iconColor)
+                } else {
+                    Image(icon)
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 19, height: 19)
+                        .foregroundColor(iconColor)
+                }
             }
             PinTriangle()
                 .fill(fill)

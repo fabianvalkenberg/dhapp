@@ -102,6 +102,7 @@ enum BusyLevel {
 }
 
 struct HelpLocationCard: View {
+    @EnvironmentObject var versie: VersieManager
     let name: String
     let hours: String
     let imageName: String
@@ -162,6 +163,8 @@ struct HelpLocationCard: View {
             }
 
             // Drukte-indicator bij de balie (3 oplopende staafjes + label).
+            // Hoort bij afspraken en het loket; zit dus niet in versie 1.
+            if versie.current.heeft(.afspraken) {
             HStack(spacing: 8) {
                 HStack(alignment: .bottom, spacing: 2) {
                     ForEach(0..<3, id: \.self) { i in
@@ -173,6 +176,7 @@ struct HelpLocationCard: View {
                 Text(busy.label)
                     .font(AppFont.theSans(size: 13, weight: .semiBold))
                     .foregroundColor(busy.color)
+            }
             }
 
             // Foto van het kantoor (valt terug op een grijze placeholder zolang

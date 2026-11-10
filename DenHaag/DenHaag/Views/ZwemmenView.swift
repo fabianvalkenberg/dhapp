@@ -1,9 +1,61 @@
 import SwiftUI
 
-// MARK: - Zwemmen Landing Page
+// MARK: - Mini-app Zwemmen
+//
+// Gebaseerd op het HTML-prototype in input/zwemmen. Eigen schermstapel binnen het
+// overlay-scherm: elk scherm schuift van rechts in, net als de overlays in MainTabView.
 
 struct ZwemmenView: View {
     @Binding var isPresented: Bool
+    @StateObject private var model = ZwemmenModel()
+    @EnvironmentObject var lang: LanguageManager
+
+    var body: some View {
+        ZStack {
+            ZwemmenHomeView(sluit: { isPresented = false })
+
+            ForEach(Array(model.pad.enumerated()), id: \.offset) { i, route in
+                scherm(route)
+                    .background(Color.white.ignoresSafeArea())
+                    .transition(.move(edge: .trailing))
+                    .zIndex(Double(i + 1))
+            }
+        }
+        .animation(.easeInOut(duration: 0.35), value: model.pad)
+        .environmentObject(model)
+        .fullScreenCover(item: $model.qr) { qr in
+            ZwQRScherm(qr: qr) { model.qr = nil }
+                .environmentObject(lang)
+        }
+        .onAppear { AnalyticsService.screen("zwemmen") }
+    }
+
+    @ViewBuilder
+    private func scherm(_ route: ZwRoute) -> some View {
+        switch route {
+        case .kopen: ZwKopenView()
+        case .activiteit(let a, let dag): ZwActiviteitView(activiteit: a, dag: dag)
+        case .zwembad(let naam): ZwZwembadView(naam: naam)
+        case .zwembaden: ZwZwembadenView()
+        case .kaartjes: ZwKaartjesView()
+        case .les: ZwLesView()
+        case .wachttijden: ZwWachttijdenView()
+        case .aanmelden: ZwAanmeldView()
+        case .kind(let id): ZwKindView(id: id)
+        case .voortgang(let id): ZwVoortgangView(id: id)
+        case .abonnement(let id): ZwAbonnementView(id: id)
+        }
+    }
+}
+
+// MARK: - Startscherm
+
+struct ZwemmenHomeView: View {
+    let sluit: () -> Void
+    @EnvironmentObject var model: ZwemmenModel
+    @EnvironmentObject var lang: LanguageManager
+
+    @State private var toonKiezer = false
 
     // Header animation states
     @State private var swimmerOffset: CGFloat = 100
@@ -18,208 +70,275 @@ struct ZwemmenView: View {
     @State private var cloud3X: CGFloat = 0
     @State private var cloud4X: CGFloat = 0
 
-    // Active reservering
-    @State private var hasReservering = true
-
     private var safeTop: CGFloat { AppDesign.safeAreaTop }
-
+    private var reservering: ZwReservering? {
+        guard let r = model.reservering, r.isGeldig else { return nil }
+        return r
+    }
 
     var body: some View {
         ZStack(alignment: .top) {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // MARK: - Header (blue zone, illustration inside, curve as overlay on top)
-                    ZStack {
-                        Color(hex: "DAEBFA")
+                    header
 
-                        // Clouds
-                        Group {
-                            Image("wolk01")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100)
-                                .offset(x: -80 + cloud1X, y: -40)
-
-                            Image("wolk02")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 70)
-                                .offset(x: 100 + cloud2X, y: -55)
-
-                            Image("wolk01")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 60)
-                                .opacity(0.7)
-                                .offset(x: 30 + cloud3X, y: -10)
-
-                            Image("wolk02")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50)
-                                .opacity(0.5)
-                                .offset(x: -130 + cloud4X, y: 5)
+                    VStack(alignment: .leading, spacing: 32) {
+                        if reservering != nil {
+                            mijnKaartjesRij
+                        } else if model.meldingZichtbaar {
+                            melding
                         }
-
-                        VStack(spacing: 0) {
-                            // Paginatitel scrollt mee; alleen de back-knop is sticky.
-                            HStack {
-                                Spacer().frame(width: 52)
-                                Text("Zwemmen")
-                                    .font(AppFont.theMix(size: 26, weight: .bold))
-                                    .foregroundColor(AppColors.textPrimary)
-                                Spacer()
-                            }
-                            .padding(.horizontal, AppDesign.horizontalPadding)
-                            .padding(.top, safeTop + 14)
-
-                            Spacer().frame(height: 40)
-
-                            if hasReservering {
-                                reserveringCard
-                                    .padding(.horizontal, AppDesign.horizontalPadding)
-                                    .transition(.asymmetric(
-                                        insertion: .scale.combined(with: .opacity),
-                                        removal: .move(edge: .top).combined(with: .opacity)
-                                    ))
-                            }
-
-                            Spacer().frame(height: 20)
-
-                            // Illustration — curve overlay covers bottom ~40px
-                            ZStack(alignment: .bottom) {
-                                Ellipse()
-                                    .fill(Color(hex: "C8D8E8"))
-                                    .frame(width: 280, height: 30)
-
-                                ZStack {
-                                    Image("zwemmer")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 160)
-                                        .rotationEffect(.degrees(swimmerRotation))
-                                        .offset(x: swimmerOffset)
-                                        .opacity(swimmerOpacity)
-
-                                    Circle()
-                                        .fill(Color.white.opacity(0.3))
-                                        .frame(width: 40, height: 40)
-                                        .scaleEffect(splashScale)
-                                        .offset(x: -20, y: 20)
-                                        .opacity(splashScale > 0 ? 1 - Double(splashScale / 3) : 0)
-                                }
-                                .padding(.bottom, 10)
-                            }
-                            .frame(height: 120)
-                            .padding(.bottom, 10)
-                        }
+                        mijnZwembad
+                        regelen
+                        nieuws
                     }
-                    .animation(.easeInOut(duration: 0.4), value: hasReservering)
-                    .overlay(alignment: .bottom) {
-                        HeaderCurveShape()
-                            .fill(AppColors.background)
-                            .frame(height: 75)
-                    }
-
-                    // MARK: - Content below header
-                    VStack(alignment: .leading, spacing: 24) {
-                        // MARK: - Jouw Zwempas
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Jouw zwempas")
-                                .font(AppFont.theMix(size: 20, weight: .bold))
-                                .foregroundColor(AppColors.textPrimary)
-
-                            if let zwemPas = Pas.allPassen.first(where: { $0.id == "zwempas" }) {
-                                PasCardView(pas: zwemPas)
-                            }
-                        }
-
-                        // MARK: - Jouw Zwembad
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text("Jouw zwembad")
-                                    .font(AppFont.theMix(size: 20, weight: .bold))
-                                    .foregroundColor(AppColors.textPrimary)
-                                Spacer()
-                                Button {
-                                    // Aanpassen action
-                                } label: {
-                                    Text("aanpassen")
-                                        .font(AppFont.theSans(size: 14, weight: .semiBold))
-                                        .foregroundColor(AppColors.groen3)
-                                }
-                            }
-
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("De Blinkerd")
-                                    .font(AppFont.theMix(size: 18, weight: .bold))
-                                    .foregroundColor(AppColors.textPrimary)
-
-                                HStack(spacing: 12) {
-                                    HStack(spacing: 4) {
-                                        Circle()
-                                            .fill(AppColors.groen3)
-                                            .frame(width: 8, height: 8)
-                                        Text("NU GEOPEND")
-                                            .font(AppFont.theSans(size: 11, weight: .bold))
-                                            .foregroundColor(AppColors.groen3)
-                                            .tracking(0.5)
-                                    }
-
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "clock")
-                                            .font(.system(size: 12))
-                                        Text("08:00 - 21:00")
-                                            .font(AppFont.theSans(size: 14, weight: .plain))
-                                    }
-                                    .foregroundColor(AppColors.textSecondary)
-                                }
-
-                                VStack(spacing: 0) {
-                                    menuItem(icon: "icon-coin-euro", label: "Kaartje kopen")
-                                    divider
-                                    menuItem(icon: "calendar", label: "Zwemles")
-                                    divider
-                                    menuItem(icon: "phone", label: "Contact")
-                                    divider
-                                    menuItem(icon: "calendar", label: "Openingstijden")
-                                }
-                                .background(Color.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(AppColors.grijs2, lineWidth: 1)
-                                )
-                            }
-                        }
-
-                        // MARK: - Alles over zwemmen
-                        externalLinkButton(title: "Alles over zwemmen")
-
-                        Spacer().frame(height: 100)
-                    }
-                    .padding(.horizontal, AppDesign.horizontalPadding)
-                    .padding(.top, 24)
+                    .padding(.horizontal, ZwStijl.pad)
+                    .padding(.top, 8)
+                    .padding(.bottom, 120)
                 }
             }
 
             // Floating nav bar: alleen de back-knop is sticky (titel scrollt mee).
-            HStack(alignment: .center, spacing: 12) {
-                BackCircleButton { isPresented = false }
-                Spacer()
-            }
-            .padding(.horizontal, AppDesign.horizontalPadding)
-            .padding(.top, safeTop + 8)
+            ZwTerugBalk(actie: sluit)
         }
         .background(AppColors.background)
         .ignoresSafeArea(edges: .top)
+        .sheet(isPresented: $toonKiezer) {
+            ZwZwembadKiezer(gekozen: model.mijnZwembad) { naam in
+                model.mijnZwembad = naam
+                toonKiezer = false
+            } sluit: { toonKiezer = false }
+            .environmentObject(lang)
+            .presentationDetents([.large])
+            .presentationCornerRadius(32)
+        }
         .onAppear {
             startHeaderAnimation()
             startCloudAnimation()
         }
     }
 
-    // MARK: - Header Animation
+    // MARK: Header (blauw, wolken, zwemmer, curve)
+
+    private var header: some View {
+        ZStack {
+            AppColors.blauw1
+
+            Group {
+                Image("wolk01").resizable().scaledToFit().frame(width: 100)
+                    .offset(x: -80 + cloud1X, y: -40)
+                Image("wolk02").resizable().scaledToFit().frame(width: 70)
+                    .offset(x: 100 + cloud2X, y: -55)
+                Image("wolk01").resizable().scaledToFit().frame(width: 60).opacity(0.7)
+                    .offset(x: 30 + cloud3X, y: -10)
+                Image("wolk02").resizable().scaledToFit().frame(width: 50).opacity(0.5)
+                    .offset(x: -130 + cloud4X, y: 5)
+            }
+
+            VStack(spacing: 0) {
+                // Paginatitel scrollt mee; alleen de back-knop is sticky.
+                HStack {
+                    Spacer().frame(width: 52)
+                    Text(lang.t("zw_title"))
+                        .font(AppFont.theMix(size: 26, weight: .bold))
+                        .foregroundColor(AppColors.textPrimary)
+                    Spacer()
+                }
+                .padding(.horizontal, ZwStijl.pad)
+                .padding(.top, safeTop + 14)
+
+                Spacer().frame(height: reservering == nil ? 40 : 28)
+
+                if let r = reservering {
+                    ZwReserveringKaart(reservering: r) { toonQR(r) }
+                        .padding(.horizontal, ZwStijl.pad)
+                        .transition(.scale.combined(with: .opacity))
+                    Spacer().frame(height: 20)
+                }
+
+                // Illustration — curve overlay covers bottom ~40px
+                ZStack(alignment: .bottom) {
+                    Ellipse()
+                        .fill(Color(hex: "C8D8E8"))
+                        .frame(width: 280, height: 30)
+
+                    ZStack {
+                        Image("zwemmer")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 160)
+                            .rotationEffect(.degrees(swimmerRotation))
+                            .offset(x: swimmerOffset)
+                            .opacity(swimmerOpacity)
+
+                        Circle()
+                            .fill(Color.white.opacity(0.3))
+                            .frame(width: 40, height: 40)
+                            .scaleEffect(splashScale)
+                            .offset(x: -20, y: 20)
+                            .opacity(splashScale > 0 ? 1 - Double(splashScale / 3) : 0)
+                    }
+                    .padding(.bottom, 10)
+                }
+                .frame(height: 120)
+                .padding(.bottom, 10)
+            }
+        }
+        .animation(.easeInOut(duration: 0.4), value: reservering)
+        .overlay(alignment: .bottom) {
+            HeaderCurveShape()
+                .fill(AppColors.background)
+                .frame(height: 75)
+        }
+    }
+
+    // MARK: Blokken
+
+    private var mijnKaartjesRij: some View {
+        Button { model.push(.kaartjes) } label: {
+            HStack(spacing: 12) {
+                ZwIcon(naam: "zw-ticket", kleur: .white)
+                Text(lang.t("zw_my_tickets"))
+                    .font(ZwStijl.tekstVet)
+                Spacer()
+                Text("1").font(ZwStijl.tekstVet)
+                ZwPijl(kleur: .white)
+            }
+            .foregroundColor(.white)
+            .padding(16)
+            .background(AppColors.groen3)
+            .cornerRadius(ZwStijl.lijstRadius)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var melding: some View {
+        HStack(alignment: .top, spacing: 8) {
+            ZwIcon(naam: "zw-info", kleur: AppColors.blauw3).padding(.top, 2)
+            VStack(alignment: .leading, spacing: 12) {
+                Text(lang.t("zw_alert_hofbad"))
+                    .font(ZwStijl.tekst)
+                    .foregroundColor(AppColors.blauw3)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button {} label: {
+                    Text(lang.t("zw_read_more"))
+                        .font(ZwStijl.tekst)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(AppColors.blauw3)
+                        .cornerRadius(AppDesign.cornerRadius)
+                }
+                .buttonStyle(.plain)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Button {
+                withAnimation(.easeInOut(duration: 0.25)) { model.meldingZichtbaar = false }
+            } label: {
+                ZwIcon(naam: "zw-close", kleur: AppColors.blauw3)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(lang.t("zw_close_alert"))
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 24)
+        .background(AppColors.blauw1)
+        .cornerRadius(AppDesign.cornerRadius)
+    }
+
+    @ViewBuilder
+    private var mijnZwembad: some View {
+        if let naam = model.mijnZwembad {
+            ZwSectie(titel: lang.t("zw_my_pool"), actie: (lang.t("zw_change"), { toonKiezer = true })) {
+                ZwZwembadKaart(zwembad: naam) { model.push(.zwembad(naam)) }
+            }
+        } else {
+            ZwSectie(titel: lang.t("zw_my_pool")) {
+                VStack(alignment: .leading, spacing: 4) {
+                    ZwIcon(naam: "zw-pool")
+                    Text(lang.t("zw_no_pool_title"))
+                        .font(ZwStijl.tekstVet)
+                        .foregroundColor(AppColors.textPrimary)
+                        .padding(.top, 4)
+                    Text(lang.t("zw_no_pool_text"))
+                        .font(ZwStijl.tekst)
+                        .foregroundColor(AppColors.textSecondary)
+                    ZwOmlijndeKnop(titel: lang.t("zw_choose_pool")) { toonKiezer = true }
+                        .padding(.top, 8)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 24)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AppColors.warmGrijs)
+                .cornerRadius(AppDesign.cornerRadius)
+            }
+        }
+    }
+
+    private var regelen: some View {
+        ZwSectie(titel: lang.t("zw_arrange")) {
+            ZwLijst {
+                ZwLinkRij(icoon: "zw-ticket", titel: lang.t("zw_buy_ticket")) { model.openKopen() }
+                ZwScheiding()
+                ZwLinkRij(icoon: "zw-subscription", titel: lang.t("zw_buy_card"), sub: lang.t("zw_buy_card_sub")) {}
+                ZwScheiding()
+                ZwLinkRij(icoon: "zw-swimming", titel: lang.t("zw_lessons")) { model.push(.les) }
+                ZwScheiding()
+                ZwLinkRij(icoon: "zw-pool", titel: lang.t("zw_pools")) { model.push(.zwembaden) }
+            }
+        }
+    }
+
+    private var nieuws: some View {
+        ZwSectie(titel: lang.t("zw_news"), actie: (lang.t("zw_preferences"), {})) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(alignment: .top, spacing: 16) {
+                    ForEach(ZwData.nieuws) { n in
+                        VStack(alignment: .leading, spacing: 20) {
+                            HStack(alignment: .top, spacing: 20) {
+                                ZwDatumBlok(datum: n.datum)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(n.tijd) · \(n.zwembad)")
+                                        .font(ZwStijl.klein)
+                                        .foregroundColor(AppColors.textSecondary)
+                                        .lineLimit(1)
+                                    Text(n.titel)
+                                        .font(ZwStijl.tekstVet)
+                                        .foregroundColor(AppColors.textPrimary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                            }
+                            Text(n.tekst)
+                                .font(ZwStijl.tekst)
+                                .foregroundColor(AppColors.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .padding(.bottom, 24)
+                        .frame(width: 300, alignment: .leading)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .background(Color.white)
+                        .cornerRadius(AppDesign.cornerRadius)
+                        .overlay(RoundedRectangle(cornerRadius: AppDesign.cornerRadius).stroke(ZwStijl.lijn, lineWidth: 1))
+                    }
+                }
+                .padding(.horizontal, ZwStijl.pad)
+                .padding(.vertical, 1)
+            }
+            .padding(.horizontal, -ZwStijl.pad)
+            .scrollTargetBehavior(.viewAligned)
+        }
+    }
+
+    private func toonQR(_ r: ZwReservering) {
+        model.qr = ZwQR(status: lang.t("zw_reserved"), toonVinkje: true, titel: r.activiteit.naam,
+                        regels: ["\(lang.zwDagKort(r.datum)) \(r.activiteit.tijd)", r.activiteit.zwembad],
+                        code: "DH-ZWEMMEN|\(r.activiteit.naam.uppercased())|\(r.activiteit.zwembad.uppercased())|\(r.activiteit.start)|KAARTJE-0001")
+    }
+
+    // MARK: Header Animation
 
     private func startHeaderAnimation() {
         guard !headerAppeared else { return }
@@ -238,130 +357,35 @@ struct ZwemmenView: View {
 
     private func startCloudAnimation() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            withAnimation(.easeInOut(duration: 18).repeatForever(autoreverses: true)) {
-                cloud1X = 50
-            }
-            withAnimation(.easeInOut(duration: 22).repeatForever(autoreverses: true)) {
-                cloud2X = -40
-            }
-            withAnimation(.easeInOut(duration: 15).repeatForever(autoreverses: true)) {
-                cloud3X = -35
-            }
-            withAnimation(.easeInOut(duration: 20).repeatForever(autoreverses: true)) {
-                cloud4X = 45
-            }
+            withAnimation(.easeInOut(duration: 18).repeatForever(autoreverses: true)) { cloud1X = 50 }
+            withAnimation(.easeInOut(duration: 22).repeatForever(autoreverses: true)) { cloud2X = -40 }
+            withAnimation(.easeInOut(duration: 15).repeatForever(autoreverses: true)) { cloud3X = -35 }
+            withAnimation(.easeInOut(duration: 20).repeatForever(autoreverses: true)) { cloud4X = 45 }
         }
     }
+}
 
-    // MARK: - Reservering Card
+// MARK: - Zwembadkiezer (sheet)
 
-    private var reserveringCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 8) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 12))
-                    .foregroundColor(AppColors.groen3)
-                Text("GERESERVEERD")
-                    .font(AppFont.theSans(size: 11, weight: .bold))
-                    .foregroundColor(AppColors.groen3)
-                    .tracking(0.5)
+struct ZwZwembadKiezer: View {
+    let gekozen: String?
+    let kies: (String) -> Void
+    let sluit: () -> Void
+    @EnvironmentObject var lang: LanguageManager
 
-                Rectangle()
-                    .fill(AppColors.grijs2)
-                    .frame(width: 1, height: 16)
-
-                Image(systemName: "clock")
-                    .font(.system(size: 12))
-                    .foregroundColor(AppColors.textSecondary)
-                Text("morgen 13:00")
-                    .font(AppFont.theSans(size: 14, weight: .plain))
-                    .foregroundColor(AppColors.textSecondary)
-            }
-
-            Text("Aquajoggen")
-                .font(AppFont.theMix(size: 20, weight: .bold))
-                .foregroundColor(AppColors.textPrimary)
-
-            Button { } label: {
-                HStack(spacing: 6) {
-                    Text("ticket")
-                        .font(AppFont.theSans(size: 16, weight: .bold))
-                    Spacer()
-                    Image("arrow-right")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
+    var body: some View {
+        VStack(spacing: 0) {
+            ZwSheetKop(titel: lang.t("zw_choose_your_pool"), sluit: sluit)
+            ScrollView {
+                VStack(spacing: 0) {
+                    ForEach(Array(ZwData.namen.enumerated()), id: \.offset) { i, naam in
+                        if i > 0 { ZwScheiding(zacht: true) }
+                        ZwKeuze(titel: naam, aan: naam == gekozen) { kies(naam) }
+                    }
                 }
-                .foregroundColor(.white)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-                .frame(maxWidth: .infinity)
-                .background(AppColors.groen3)
-                .cornerRadius(AppDesign.cornerRadius)
+                .padding(.horizontal, 24)
+                .padding(.top, 8)
             }
-        }
-        .padding(20)
-        .background(Color.white)
-        .cornerRadius(AppDesign.cornerRadius)
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-    }
-
-    // MARK: - Shared Components
-
-    private var divider: some View {
-        Rectangle()
-            .fill(AppColors.grijs2)
-            .frame(height: 1)
-    }
-
-    private func menuItem(icon: String, label: String) -> some View {
-        Button { } label: {
-            HStack(spacing: 12) {
-                Image(icon)
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(AppColors.textSecondary)
-
-                Text(label)
-                    .font(AppFont.theSans(size: 18, weight: .plain))
-                    .foregroundColor(AppColors.textSecondary)
-                    .lineLimit(1)
-
-                Spacer()
-
-                Image("arrow-right")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .foregroundColor(AppColors.textSecondary)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 18)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func externalLinkButton(title: String) -> some View {
-        Button { } label: {
-            HStack(spacing: 6) {
-                Text(title)
-                    .font(AppFont.theSans(size: 16, weight: .semiBold))
-                Image(systemName: "arrow.up.right.square")
-                    .font(.system(size: 14, weight: .medium))
-            }
-            .foregroundColor(AppColors.groen3)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(Color.white)
-            .cornerRadius(AppDesign.cornerRadius)
-            .overlay(
-                RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
-                    .stroke(AppColors.groen3, lineWidth: 1)
-            )
         }
     }
 }

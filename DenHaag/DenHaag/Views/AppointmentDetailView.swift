@@ -11,7 +11,15 @@ struct ChecklistItem: Identifiable {
 /// met titel ernaast, en losse elementen zonder overbodige kaders.
 struct AppointmentDetailView: View {
     @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var afspraak: AfspraakStore
+    @EnvironmentObject var berichten: BerichtenStore
+    @EnvironmentObject var versie: VersieManager
     var onClose: () -> Void = {}
+
+    @State private var toonVerplaatsen = false
+    @State private var toonAfzeggen = false
+    /// Bevestiging na verplaatsen of afzeggen, bovenaan het scherm.
+    @State private var bevestiging: String?
 
     @State private var floatingEmoji: String? = nil
     @State private var emojiOffset: CGFloat = 0
@@ -52,12 +60,38 @@ struct AppointmentDetailView: View {
                             .foregroundColor(AppColors.textSecondary)
                     }
 
+                    if let bevestiging {
+                        HStack(spacing: 10) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(AppColors.groen3)
+                            Text(bevestiging)
+                                .font(AppFont.theSans(size: 16, weight: .semiBold))
+                                .foregroundColor(AppColors.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(AppColors.groen1.opacity(0.6))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+
+                    if afspraak.afgezegd {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(lang.t("afspraak_afgezegd_tekst"))
+                                .font(AppFont.theSans(size: 17, weight: .plain))
+                                .foregroundColor(AppColors.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            actionButton(title: lang.t("afspraak_kies_moment"), filled: true) { toonVerplaatsen = true }
+                        }
+                    }
+
                     // Datum / tijd / locatie — netjes in één boxje
                     VStack(spacing: 0) {
-                        plainInfoRow(icon: "calendar", label: lang.t("date"), value: lang.t("appointment_date"))
+                        plainInfoRow(icon: "calendar", label: lang.t("date"), value: AfspraakStore.dag(afspraak.datum).eersteHoofdletter)
                             .padding(16)
                         Rectangle().fill(AppColors.grijs2).frame(height: 1)
-                        plainInfoRow(icon: "clock", label: lang.t("time"), value: lang.t("appointment_time"), useSFSymbol: true)
+                        plainInfoRow(icon: "clock", label: lang.t("time"), value: AfspraakStore.tijd(afspraak.datum), useSFSymbol: true)
                             .padding(16)
                         Rectangle().fill(AppColors.grijs2).frame(height: 1)
                         plainInfoRow(icon: "location-pin", label: lang.t("location"), value: lang.t("appointment_location"))
@@ -66,6 +100,7 @@ struct AppointmentDetailView: View {
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppColors.grijs2, lineWidth: 1))
+                    .opacity(afspraak.afgezegd ? 0.45 : 1)
 
                     // Meenemen-checklist — het belangrijkste, dus een slag groter en
                     // zonder lijntjes tussen de items.
@@ -114,9 +149,11 @@ struct AppointmentDetailView: View {
                     }
 
                     // Acties
-                    VStack(spacing: 12) {
-                        actionButton(title: lang.t("reschedule"), filled: true)
-                        actionButton(title: lang.t("cancel_appointment"), filled: false)
+                    if !afspraak.afgezegd {
+                        VStack(spacing: 12) {
+                            actionButton(title: lang.t("reschedule"), filled: true) { toonVerplaatsen = true }
+                            actionButton(title: lang.t("cancel_appointment"), filled: false) { toonAfzeggen = true }
+                        }
                     }
 
                     Spacer().frame(height: 60)
@@ -128,6 +165,37 @@ struct AppointmentDetailView: View {
             BackCircleButton { onClose() }
                 .padding(.leading, AppDesign.horizontalPadding)
                 .padding(.top, safeTop + 6)
+        }
+        // De notch-hoogte zit al in safeTop; niet dubbel tellen.
+        .ignoresSafeArea(edges: .top)
+        .animation(.easeInOut(duration: 0.3), value: bevestiging)
+        .animation(.easeInOut(duration: 0.3), value: afspraak.afgezegd)
+        .sheet(isPresented: $toonVerplaatsen) {
+            AfspraakVerplaatsenView { nieuw in
+                let wasAfgezegd = afspraak.afgezegd
+                afspraak.datum = nieuw
+                afspraak.afgezegd = false
+                let moment = "\(AfspraakStore.dag(nieuw)) om \(AfspraakStore.tijd(nieuw))"
+                bevestiging = String(format: lang.t(wasAfgezegd ? "afspraak_gemaakt_bev" : "afspraak_verplaatst_bev"), moment)
+                AnalyticsService.track(wasAfgezegd ? "afspraak_nieuw" : "afspraak_verplaatst")
+                if versie.current.heeft(.notificaties) {
+                    berichten.stuur(.afspraken, titel: lang.t("afspraak_bevestigd_push"),
+                                    tekst: String(format: lang.t("afspraak_bevestigd_push_tekst"), moment), na: 2)
+                }
+            }
+            .environmentObject(lang)
+            .environmentObject(afspraak)
+            .presentationDetents([.large])
+        }
+        .alert(lang.t("afspraak_afzeggen_vraag"), isPresented: $toonAfzeggen) {
+            Button(lang.t("afspraak_niet_afzeggen"), role: .cancel) { }
+            Button(lang.t("cancel_appointment"), role: .destructive) {
+                afspraak.afgezegd = true
+                bevestiging = lang.t("afspraak_afgezegd_bev")
+                AnalyticsService.track("afspraak_afgezegd")
+            }
+        } message: {
+            Text(String(format: lang.t("afspraak_afzeggen_msg"), "\(AfspraakStore.dag(afspraak.datum)) om \(AfspraakStore.tijd(afspraak.datum))"))
         }
     }
 
@@ -180,8 +248,8 @@ struct AppointmentDetailView: View {
         }
     }
 
-    private func actionButton(title: String, filled: Bool) -> some View {
-        Button {} label: {
+    private func actionButton(title: String, filled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             HStack(spacing: 6) {
                 Text(title)
                     .font(AppFont.theSans(size: 16, weight: .semiBold))

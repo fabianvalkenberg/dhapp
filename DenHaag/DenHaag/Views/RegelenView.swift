@@ -374,12 +374,16 @@ struct RegelenView: View {
                     }
                 }
                 .toolbar {
-                    // "Klaar"-knop boven het toetsenbord om het te sluiten.
-                    ToolbarItemGroup(placement: .keyboard) {
-                        Spacer()
-                        Button("Klaar") { isInputFocused = false }
-                            .font(AppFont.theSans(size: 17, weight: .bold))
-                            .foregroundColor(AppColors.groen3)
+                    // "Klaar"-knop boven het toetsenbord om het te sluiten. Alleen bij
+                    // dít veld: de tab blijft in leven, anders verschijnt de knop ook
+                    // boven tekstvelden elders in de app (waar hij niets doet).
+                    if isInputFocused {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("Klaar") { isInputFocused = false }
+                                .font(AppFont.theSans(size: 17, weight: .bold))
+                                .foregroundColor(AppColors.groen3)
+                        }
                     }
                 }
 

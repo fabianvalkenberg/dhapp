@@ -25,6 +25,11 @@ Dit wijkt af van de overheidsstandaard (die "u" voorschrijft). Als dat ooit
 omgaat, is het een find-replace door `LanguageManager` — maar dan wél overal
 tegelijk, inclusief de video-scripts.
 
+**Bekende afwijking (open):** de meldflow volgt Figma MOR '26 en zegt "u"
+("Waar gaat uw melding over?"), en de chat in Regelen antwoordt met "u" omdat
+de systeemprompt dat vraagt. De rest van de app zegt "je". Kies één vorm voordat
+dit naar inwoners gaat; zie `docs/OVERWEGINGEN.md`.
+
 ## Drie talen, altijd samen
 
 Elke nieuwe UI-tekst krijgt een sleutel in **alle drie** de dictionaries van
@@ -47,6 +52,9 @@ gebruikt.
 | buurt | wijk, gebied |
 | regelen | diensten, producten |
 | melden | rapporteren |
+| je zaak (ondernemer) | je bedrijf, je onderneming |
+| Voor je zaak (buurtfilter) | Ondernemers, Zakelijk |
+| Zet morgen je oud papier buiten | Ophaaldag papier: morgen |
 
 **Let op het verschil melding / aanvraag.** De Ombudsman stelde vast dat
 inwoners dat verschil niet begrijpen. Gebruik de woorden dus nooit door elkaar,

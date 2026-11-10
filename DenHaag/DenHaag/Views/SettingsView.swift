@@ -4,10 +4,14 @@ struct SettingsView: View {
     @EnvironmentObject var lang: LanguageManager
     @ObservedObject var settings: HomeSettingsModel
     @Binding var isPresented: Bool
-    @State private var showLanguageSelection = false
     @State private var showUitgangspunten = false
     @State private var showResetConfirm = false
     @State private var showFeedback = false
+    @State private var showVersie = false
+    @State private var showOnboarding = false
+    @EnvironmentObject var versie: VersieManager
+    @EnvironmentObject var rol: RolManager
+    @State private var showBerichtVoorkeuren = false
 
     private var safeTop: CGFloat { AppDesign.safeAreaTop }
 
@@ -23,7 +27,8 @@ struct SettingsView: View {
                         // Green header with profile - extends under status bar
                         ZStack {
                             // Green facetten background
-                            AppColors.groen3
+                            // Inwoner groen, ondernemer blauw.
+                            (rol.isOndernemer ? AppColors.blauw3 : AppColors.groen3)
 
                             // Diagonal overlay for depth
                             GeometryReader { geo in
@@ -34,71 +39,47 @@ struct SettingsView: View {
                                     path.addLine(to: CGPoint(x: 0, y: geo.size.height))
                                     path.closeSubpath()
                                 }
-                                .fill(AppColors.groen4)
+                                .fill(rol.isOndernemer ? Color(hex: "0B4C82") : AppColors.groen4)
                             }
 
-                            VStack(spacing: 12) {
-                                Spacer()
-                                    .frame(height: safeTop + 50)
+                            // Swipe tussen jezelf en je zaak; de kleur volgt mee.
+                            VStack(spacing: 14) {
+                                Spacer().frame(height: safeTop + 44)
+                                TabView(selection: Binding(
+                                    get: { rol.rol },
+                                    set: { nieuw in
+                                        UISelectionFeedbackGenerator().selectionChanged()
+                                        withAnimation(.easeInOut(duration: 0.35)) { rol.rol = nieuw }
+                                    })) {
+                                    profielPagina(ondernemer: false).tag(RolManager.Rol.inwoner)
+                                    profielPagina(ondernemer: true).tag(RolManager.Rol.ondernemer)
+                                }
+                                .tabViewStyle(.page(indexDisplayMode: .never))
+                                .frame(height: 290)
 
-                                // Profile photo
-                                Circle()
-                                    .fill(Color.white.opacity(0.2))
-                                    .frame(width: 120, height: 120)
-                                    .overlay(
-                                        Image(systemName: "person.fill")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 50, height: 50)
-                                            .foregroundColor(.white.opacity(0.7))
-                                    )
-                                    .overlay(
-                                        Circle()
-                                            .stroke(Color.white, lineWidth: 3)
-                                    )
-
-                                // Name
-                                Text(lang.t("name_anne"))
-                                    .font(AppFont.theMix(size: 22, weight: .bold))
-                                    .foregroundColor(.white)
-
-                                Text(lang.t("surname"))
-                                    .font(AppFont.bodyRegular())
-                                    .foregroundColor(.white.opacity(0.8))
-
-                                // BSN
+                                // Paginapuntjes + hint dat je kunt vegen
                                 HStack(spacing: 8) {
-                                    Text("BSN: 123456788")
-                                        .font(AppFont.bodyRegular())
-                                        .foregroundColor(.white.opacity(0.8))
-
-                                    Button {
-                                        UIPasteboard.general.string = "123456788"
-                                    } label: {
-                                        Image(systemName: "doc.on.doc")
-                                            .font(.system(size: 16))
-                                            .foregroundColor(.white.opacity(0.8))
+                                    ForEach([RolManager.Rol.inwoner, .ondernemer], id: \.self) { r in
+                                        Capsule()
+                                            .fill(Color.white.opacity(rol.rol == r ? 1 : 0.4))
+                                            .frame(width: rol.rol == r ? 22 : 8, height: 8)
                                     }
                                 }
-
-                                Spacer()
-                                    .frame(height: 20)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: rol.rol)
+                                Text(lang.t(rol.isOndernemer ? "rol_veeg_terug" : "rol_veeg_zaak"))
+                                    .font(AppFont.theSans(size: 14, weight: .plain))
+                                    .foregroundColor(.white.opacity(0.75))
+                                Spacer().frame(height: 18)
                             }
                         }
-                        .frame(height: 340 + safeTop)
+                        .frame(height: 400 + safeTop)
+                        .animation(.easeInOut(duration: 0.35), value: rol.rol)
 
                         // Menu items
                         VStack(spacing: 0) {
                             SettingsMenuItem(icon: "user", title: lang.t("personal_data"))
                             SettingsMenuItem(icon: "preferences", title: lang.t("settings"))
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.25)) {
-                                    showLanguageSelection = true
-                                }
-                            } label: {
-                                SettingsMenuItem(systemIcon: "textformat.size", title: lang.t("language"), trailing: lang.current.displayName)
-                            }
-                            .buttonStyle(.plain)
+                            // Taalkeuze staat tijdelijk uit: de app is alleen Nederlands.
                             SettingsMenuItem(icon: "bell", title: lang.t("notifications"))
 
                             // Uitgangspunten
@@ -108,6 +89,24 @@ struct SettingsView: View {
                                 }
                             } label: {
                                 SettingsMenuItem(systemIcon: "lightbulb", title: lang.t("uitgangspunten"))
+                            }
+                            .buttonStyle(.plain)
+
+                            // Onboarding starten (voor demo's en tests)
+                            Button {
+                                showOnboarding = true
+                            } label: {
+                                SettingsMenuItem(systemIcon: "play.circle", title: lang.t("onboarding_start"))
+                            }
+                            .buttonStyle(.plain)
+
+                            // Versie van de app (voor demo's)
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    showVersie = true
+                                }
+                            } label: {
+                                SettingsMenuItem(systemIcon: "square.stack.3d.up", title: lang.t("versie_title"), trailing: lang.t(versie.current.titleKey))
                             }
                             .buttonStyle(.plain)
 
@@ -173,19 +172,25 @@ struct SettingsView: View {
                     Spacer()
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
-                .padding(.top, safeTop + 8)
-            }
-
-            // Language selection overlay
-            if showLanguageSelection {
-                LanguageSelectionView(isPresented: $showLanguageSelection)
-                    .transition(.move(edge: .trailing))
-                    .zIndex(1)
+                .padding(.top, 6)
             }
 
             // Uitgangspunten overlay
             if showUitgangspunten {
                 UitgangspuntenView(isPresented: $showUitgangspunten)
+                    .transition(.move(edge: .trailing))
+                    .zIndex(1)
+            }
+
+            if showBerichtVoorkeuren {
+                BerichtVoorkeurenView(isPresented: $showBerichtVoorkeuren)
+                    .transition(.move(edge: .trailing))
+                    .zIndex(1)
+            }
+
+            // Versie-keuze overlay
+            if showVersie {
+                VersieSelectionView(isPresented: $showVersie)
                     .transition(.move(edge: .trailing))
                     .zIndex(1)
             }
@@ -197,6 +202,16 @@ struct SettingsView: View {
                     .zIndex(1)
             }
         }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            // Na afloop terug naar home, zodat je de gekozen tegels meteen ziet.
+            OnboardingView(settings: settings, onFinish: {
+                showOnboarding = false
+                isPresented = false
+            })
+            .environmentObject(lang)
+            .environmentObject(versie)
+        }
+        .onChange(of: showOnboarding) { _, v in if v { AnalyticsService.track("open_onboarding") } }
         .alert(lang.t("reset_demo"), isPresented: $showResetConfirm) {
             Button(lang.t("cancel"), role: .cancel) { }
             Button(lang.t("reset_demo_confirm"), role: .destructive) { resetAndQuit() }
@@ -205,9 +220,47 @@ struct SettingsView: View {
         }
     }
 
-    /// Wist de deelnemer-data en sluit de app af. Omdat de onboarding-gate een
-    /// in-memory `@State` is, start de app daarna gegarandeerd schoon op bij de
-    /// onboarding (een echte koude start, niet alleen schorsen/hervatten).
+    /// Eén kant van het profiel: jij (BSN) of je zaak (KvK).
+    private func profielPagina(ondernemer: Bool) -> some View {
+        VStack(spacing: 12) {
+            Circle()
+                .fill(Color.white.opacity(0.2))
+                .frame(width: 120, height: 120)
+                .overlay(
+                    Image(systemName: ondernemer ? "storefront.fill" : "person.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
+                        .foregroundColor(.white.opacity(0.7))
+                )
+                .overlay(Circle().stroke(Color.white, lineWidth: 3))
+
+            Text(ondernemer ? lang.t("ond_business_name") : settings.greetingName)
+                .font(AppFont.theMix(size: 22, weight: .bold))
+                .foregroundColor(.white)
+
+            Text(ondernemer ? lang.t("ond_profiel_sub") : lang.t("surname"))
+                .font(AppFont.bodyRegular())
+                .foregroundColor(.white.opacity(0.8))
+
+            HStack(spacing: 8) {
+                Text(ondernemer ? "KvK: 87654321" : "BSN: 123456788")
+                    .font(AppFont.bodyRegular())
+                    .foregroundColor(.white.opacity(0.8))
+                Button {
+                    UIPasteboard.general.string = ondernemer ? "87654321" : "123456788"
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                        .font(.system(size: 16))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// Wist de deelnemer-data en sluit de app af, zodat de volgende start
+    /// schoon begint (een echte koude start, niet alleen schorsen/hervatten).
     private func resetAndQuit() {
         // Sessie netjes afsluiten vóór de app stopt.
         AnalyticsService.shared.endSession()
@@ -216,6 +269,10 @@ struct SettingsView: View {
         d.removeObject(forKey: "werkAddress")
         d.removeObject(forKey: "app_language")
         d.removeObject(forKey: "userName")
+        d.removeObject(forKey: "spaardoel")
+        d.removeObject(forKey: "dappreClubs")
+        d.removeObject(forKey: FietspasStore.key)
+        d.removeObject(forKey: "berichtVoorkeuren")
         d.synchronize()
         // Korte vertraging zodat de alert netjes sluit voor de app stopt.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {

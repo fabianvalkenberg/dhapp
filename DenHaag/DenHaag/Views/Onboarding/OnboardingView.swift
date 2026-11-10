@@ -3,6 +3,7 @@ import MapKit
 
 struct OnboardingView: View {
     @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var versie: VersieManager
     @ObservedObject var settings: HomeSettingsModel
     var onFinish: () -> Void
 
@@ -15,9 +16,31 @@ struct OnboardingView: View {
     // Zorgt dat we de naam per sessie precies één keer leegmaken.
     @State private var didResetName = false
 
-    private let totalSteps = 7
+    /// Zonder buurtnieuws (versie 1 en 2) valt de laatste stap weg: er is dan
+    /// niets te volgen in de buurt.
+    private var totalSteps: Int { versie.current.heeft(.buurtLeven) ? 7 : 6 }
     private let gemeenteStep = 5
     private let buurtStep = 6
+
+    /// Alleen de keuzes waarvan de tegel in deze versie bestaat.
+    private var takenInVersie: [OnboardChip] {
+        Self.gemeenteTaken.filter { $0.tileID.map(versie.current.allowsTile) ?? true }
+    }
+    private var onderwerpenInVersie: [OnboardChip] {
+        Self.buurtOnderwerpen.filter { $0.tileID.map(versie.current.allowsTile) ?? true }
+    }
+
+    /// Uitleg "Met deze app kan je …" past zich aan wat er in de versie zit.
+    private var regelenTekst: (String, String) {
+        if versie.current.heeft(.regelen) { return (lang.t("onb_regelen_title"), lang.t("onb_regelen_body")) }
+        if versie.current.heeft(.voorJou) { return (lang.t("onb_v2_regelen_title"), lang.t("onb_v2_regelen_body")) }
+        return (lang.t("onb_v1_regelen_title"), lang.t("onb_v1_regelen_body"))
+    }
+    private var buurtTekst: (String, String) {
+        versie.current.heeft(.buurtLeven)
+            ? (lang.t("onb_buurt_title"), lang.t("onb_buurt_body"))
+            : (lang.t("onb_fiets_title"), lang.t("onb_fiets_body"))
+    }
 
     init(settings: HomeSettingsModel, onFinish: @escaping () -> Void) {
         self.settings = settings
@@ -38,6 +61,8 @@ struct OnboardingView: View {
         OnboardChip(id: "ooievaarspas", label: "Ooievaarspas",              tileID: "ooievaarspas",  illustration: nil),
         OnboardChip(id: "rechten",      label: "Waar heb ik recht op",      tileID: "rechten",       illustration: nil),
         OnboardChip(id: "bieb",         label: "Naar de bieb",              tileID: "bieb",          illustration: nil),
+        OnboardChip(id: "fietsparkeren", label: "Fiets parkeren",           tileID: "fietsparkeren", illustration: nil),
+        OnboardChip(id: "fietspas",     label: "Fietspas",                  tileID: "fietspas",      illustration: nil),
     ]
 
     /// Stap 2 — buurt-onderwerpen. Elke keuze levert een snelkoppel-tegel op die
@@ -105,7 +130,7 @@ struct OnboardingView: View {
             Spacer().frame(height: 40)
             textBlock(
                 title: lang.t("onb_digid_title"),
-                body: lang.t("onb_digid_body")
+                body: lang.t(versie.current.heeft(.voorJou) ? "onb_digid_body" : "onb_v1_digid_body")
             )
             Spacer()
         }
@@ -118,15 +143,21 @@ struct OnboardingView: View {
             Spacer()
             digidLogo
             Spacer().frame(height: 28)
+            // Zonder "voor jou" (versie 1) zijn er geen lopende zaken om op te halen.
             textBlock(
                 title: lang.t("onb_gegevens_title"),
-                body: lang.t("onb_gegevens_body")
+                body: lang.t(versie.current.heeft(.voorJou) ? "onb_gegevens_body" : "onb_v1_gegevens_body")
             )
             Spacer().frame(height: 28)
 
             VStack(spacing: 12) {
-                gegevensRow(icon: "calendar", text: "Afspraak: nieuw paspoort")
-                gegevensRow(icon: "doc.text", text: "Aanvraag uitbouw")
+                if versie.current.heeft(.voorJou) {
+                    gegevensRow(icon: "calendar", text: "Afspraak: nieuw paspoort")
+                    gegevensRow(icon: "doc.text", text: "Aanvraag uitbouw")
+                } else {
+                    gegevensRow(icon: "person", text: lang.t("onb_v1_gegevens_naam"))
+                    gegevensRow(icon: "house", text: lang.t("onb_v1_gegevens_adres"))
+                }
             }
 
             Spacer()
@@ -211,8 +242,8 @@ struct OnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             Spacer().frame(height: 28)
             textBlock(
-                title: lang.t("onb_regelen_title"),
-                body: lang.t("onb_regelen_body")
+                title: regelenTekst.0,
+                body: regelenTekst.1
             )
             Spacer()
         }
@@ -227,8 +258,8 @@ struct OnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             Spacer().frame(height: 28)
             textBlock(
-                title: lang.t("onb_buurt_title"),
-                body: lang.t("onb_buurt_body")
+                title: buurtTekst.0,
+                body: buurtTekst.1
             )
             Spacer()
         }
@@ -249,7 +280,7 @@ struct OnboardingView: View {
         chipStep(
             title: lang.t("onb_taken_title"),
             subtitle: lang.t("onb_taken_sub"),
-            chips: Self.gemeenteTaken,
+            chips: takenInVersie,
             selection: $selectedTaken
         )
     }
@@ -259,7 +290,7 @@ struct OnboardingView: View {
         chipStep(
             title: lang.t("onb_buurtvoork_title"),
             subtitle: lang.t("onb_buurtvoork_sub"),
-            chips: Self.buurtOnderwerpen,
+            chips: onderwerpenInVersie,
             selection: $selectedOnderwerpen
         )
     }
@@ -452,7 +483,8 @@ struct OnboardingView: View {
     }
 
     private var paspoortIllustration: some View {
-        Image("illu-paspoort")
+        // Versie 1 gaat over melden, niet over aanvragen: dan de meld-illustratie.
+        Image(versie.current.heeft(.voorJou) ? "illu-paspoort" : "ill-melding")
             .resizable()
             .scaledToFit()
             .frame(height: 130)
@@ -462,14 +494,19 @@ struct OnboardingView: View {
     /// en de pulserende thuis-radar), zodat de stijl in de onboarding al klopt.
     private var buurtMapIllustration: some View {
         BuurtMapView(
-            items: Array(NeighbourhoodItem.sample.prefix(6)),
+            // Zonder buurtnieuws de stallingen; die liggen verder weg, dus ruimer.
+            items: versie.current.heeft(.buurtLeven)
+                ? Array(NeighbourhoodItem.sample.prefix(6))
+                : NeighbourhoodItem.stallingen,
             homeCoordinate: BuurtView.thuisCoord,
             selectedItemID: .constant(nil),
             // Gecentreerd op de thuislocatie zónder de carrousel-offset, zodat de
             // markers netjes midden in het kaartje staan i.p.v. bovenin geklemd.
             region: MKCoordinateRegion(
                 center: BuurtView.thuisCoord,
-                span: MKCoordinateSpan(latitudeDelta: 0.010, longitudeDelta: 0.010)
+                span: versie.current.heeft(.buurtLeven)
+                    ? MKCoordinateSpan(latitudeDelta: 0.010, longitudeDelta: 0.010)
+                    : MKCoordinateSpan(latitudeDelta: 0.030, longitudeDelta: 0.030)
             ),
             regionVersion: 0
         )

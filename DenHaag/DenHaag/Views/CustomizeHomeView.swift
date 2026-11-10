@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CustomizeHomeView: View {
     @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var versie: VersieManager
     @ObservedObject var settings: HomeSettingsModel
     @Binding var isPresented: Bool
 
@@ -40,7 +41,7 @@ struct CustomizeHomeView: View {
                 // Toggle list
                 ScrollView {
                     VStack(spacing: 0) {
-                        ForEach(settings.tiles) { tile in
+                        ForEach(settings.tiles.filter { versie.current.tegels.contains($0.id) }) { tile in
                             VStack(spacing: 0) {
                                 HStack {
                                     Text(lang.t(tile.titleKey))
