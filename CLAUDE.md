@@ -34,6 +34,10 @@ UI-teksten en toon: `docs/VOICE.md` · afwegingen zonder besluit:
 - **Laatste TestFlight-build:** 30, gebouwd vanaf de lokale branch `testflight-30`
   (PR #13 + #10 samengevoegd; zie memory *testflight-deploy*).
 
+- **Laatste TestFlight-build:** 32, gebouwd vanaf de lokale branch `testflight-32`
+  (build 30 = PR #13 + #10, plus PR #14 buurtfilters en PR #15 naamscherm bij
+  elke start; zie memory *testflight-deploy*).
+
 ## Bouwen
 
 ⚠️ `xcode-select` wijst op deze Mac naar CommandLineTools: zet eerst

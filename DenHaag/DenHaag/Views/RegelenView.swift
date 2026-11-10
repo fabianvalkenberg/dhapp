@@ -30,6 +30,7 @@ struct ChatMessage: Identifiable {
 
 struct RegelenView: View {
     @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var versie: VersieManager
     /// Of de Regelen-tab momenteel actief is; zo niet, pauzeert de tegel-marquee.
     var isActive: Bool = true
     @State private var phase: RegelenPhase = .idle
@@ -256,16 +257,10 @@ struct RegelenView: View {
 
     // MARK: - Greeting
 
-    /// Naam uit de onboarding (zelfde bron als de home-greeting); valt terug op "Anne".
-    private var greetingName: String {
-        let n = (UserDefaults.standard.string(forKey: "userName") ?? "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return n.isEmpty ? "Anne" : n
-    }
-
     private var greetingBlock: some View {
         VStack(spacing: 4) {
-            Text("Hi \(greetingName),")
+            Text(HomeSettingsModel.begroeting(naam: UserDefaults.standard.string(forKey: "userName") ?? "",
+                                              versie: versie.current, lang: lang))
                 .font(AppFont.theMix(size: 26, weight: .bold))
                 .foregroundColor(AppColors.textPrimary)
             Text(lang.t("what_to_arrange"))

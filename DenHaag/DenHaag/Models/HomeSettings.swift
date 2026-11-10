@@ -178,6 +178,14 @@ class HomeSettingsModel: ObservableObject {
         tiles.filter { $0.isSelected }
     }
 
+    /// Begroeting op home en Regelen. In Versie 2 zonder naam (naamscherm
+    /// overgeslagen) een begroeting zonder naam; andere versies vallen terug op Anne.
+    static func begroeting(naam: String, versie: AppVersie, lang: LanguageManager) -> String {
+        let n = naam.trimmingCharacters(in: .whitespacesAndNewlines)
+        if n.isEmpty && versie == .v2 { return lang.t("home_hallo") }
+        return "Hi \(n.isEmpty ? "Anne" : n),"
+    }
+
     /// Naam voor de begroeting; valt terug op "Anne" als er niets is opgegeven.
     var greetingName: String {
         let trimmed = userName.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -66,8 +66,9 @@ enum AppVersie: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Bij de testversie vraagt de app bij het openen eerst je naam.
-    var vraagtNaam: Bool { self == .test }
+    /// Versie 2 en de testversie vragen bij élk openen eerst je naam, zodat
+    /// elke nieuwe deelnemer bij het naamscherm begint.
+    var vraagtNaam: Bool { self == .v2 || self == .test }
 
     /// Een home-tegel bestaat alleen als het scherm erachter in deze versie zit.
     func allowsTile(_ id: String) -> Bool {
@@ -163,6 +164,14 @@ final class VersieManager: ObservableObject {
     }
 
     init() {
+        // Sinds 2026-11-10 opent de app standaard in Versie 2. Eenmalig ook voor
+        // wie al een versie had opgeslagen (vaak "Prototype testen"); daarna
+        // blijft een eigen keuze op "Versie van de app" gewoon bewaard.
+        let migratieKey = "versieStandaardV2"
+        if !UserDefaults.standard.bool(forKey: migratieKey) {
+            UserDefaults.standard.set(AppVersie.v2.rawValue, forKey: "app_versie")
+            UserDefaults.standard.set(true, forKey: migratieKey)
+        }
         #if DEBUG
         // Testharnas: `-versie v1` (of v2/v3) start direct in die versie.
         let args = ProcessInfo.processInfo.arguments
@@ -171,10 +180,9 @@ final class VersieManager: ObservableObject {
             UserDefaults.standard.set(gekozen.rawValue, forKey: "app_versie")
         }
         #endif
-        // Oude opgeslagen waarden (basis/uitgebreid/volledig) bestaan niet meer:
-        // die vallen terug op versie 1.
+        // Onbekende opgeslagen waarden vallen terug op de standaard: versie 2.
         let saved = UserDefaults.standard.string(forKey: "app_versie") ?? ""
-        current = AppVersie(rawValue: saved) ?? .v1
+        current = AppVersie(rawValue: saved) ?? .v2
         AnalyticsService.setSession(["appVersie": current.rawValue])
     }
 }
