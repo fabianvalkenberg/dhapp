@@ -96,9 +96,9 @@ extension PreferenceTile {
         var gezien = Set<String>()
         var uit: [PreferenceTile] = !metVergunningen ? [] : [
             PreferenceTile(id: "ond_vergunningen", titleKey: "tile_ond_vergunningen",
-                           illustration: "sf:doc.text.fill", destination: .vergunningen, isSelected: true),
+                           illustration: "ill-vergunningen", destination: .vergunningen, isSelected: true),
             PreferenceTile(id: "ond_terras", titleKey: "tile_ond_terras",
-                           illustration: "sf:umbrella.fill", destination: .vergunningen, isSelected: true),
+                           illustration: "ill-terras", destination: .vergunningen, isSelected: true),
         ]
         for t in tegels where !weg.contains(t.id) {
             let key = naam[t.id] ?? t.titleKey

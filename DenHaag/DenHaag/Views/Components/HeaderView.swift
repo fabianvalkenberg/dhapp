@@ -321,7 +321,7 @@ struct HeaderView: View {
                             .foregroundColor(AppColors.textPrimary)
                             .frame(width: 24, height: 24)
                             .padding(10)
-                            .background(Color.white.opacity(0.5))
+                            .background(Color.white.opacity(rol.isOndernemer ? 1 : 0.5))
                             .clipShape(Circle())
                             .overlay(alignment: .topTrailing) {
                                 let n = berichten.ongelezen(in: versie.current)
@@ -345,7 +345,7 @@ struct HeaderView: View {
                         .foregroundColor(AppColors.textPrimary)
                         .frame(width: 24, height: 24)
                         .padding(10)
-                        .background(Color.white.opacity(0.5))
+                        .background(Color.white.opacity(rol.isOndernemer ? 1 : 0.5))
                         .clipShape(Circle())
                 }
             }
@@ -451,7 +451,9 @@ struct HeaderView: View {
         .background(
             GeometryReader { geo in
                 let parallaxX = -CGFloat(currentPage) * 20
-                Image(rol.isOndernemer ? "facetten-blauw" : "facetten-geel")
+                // Design review 2026-11: witte tekst op lichtblauw haalde het
+                // contrast niet; de ondernemerskop is nu donkerblauw.
+                Image(rol.isOndernemer ? "facetten-blauw-donker" : "facetten-geel")
                     .resizable()
                     .scaledToFill()
                     .frame(

@@ -350,3 +350,22 @@ Werkt vanaf iOS 18 (`onScrollGeometryChange`); op iOS 17 geen vervaging.
 Voor screenshots zonder tikken: `-scherm instellingen|startscherm|afspraak|
 parkeren|afval|afvalkalender|kwijtschelding|aanvraag|paspoort|berichten|
 vergunningen|meldingstatus` opent dat detailscherm direct.
+
+## 2026-11-09 · Tegels: vaste hoogte, icoon en label op vaste plek (design review)
+
+"Tiles uitlijning": tegels met een label van twee regels werden hoger en het
+raster liep scheef. `TegelView` is nu vast 166 hoog (compact 140), met de
+illustratie in een vast vak van 70×65 bovenaan en het label direct eronder.
+Labels worden niet verkleind om te passen. Tussenruimte blijft 12 (Figma: 10,
+maar op een ander grid).
+
+## 2026-11-09 · Ondernemerskop donkerblauw, vergunningen en terras met illustratie
+
+"Te weinig contrast in header": wit op lichtblauw haalde WCAG AA niet. De kop
+gebruikt nu `facetten-blauw-donker` (blauw3 met een facet in #293575, uit
+Figma) en het profielrondje is wit. Witte tekst op #1261A3 is ca. 6:1.
+
+"Icons op tegels": Mijn vergunningen en Terras of uitstalling krijgen de
+illustraties uit de review (`ill-vergunningen`, `ill-terras`, als SVG). Dit
+vervangt het besluit van 2026-11-07 dat die twee hun icoon hielden; de bieb
+houdt zijn icoon (daar is niets voor aangeleverd).
