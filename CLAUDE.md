@@ -31,8 +31,9 @@ UI-teksten en toon: `docs/VOICE.md` · afwegingen zonder besluit:
 - **Rollen:** inwoner of ondernemer ("Kapsalon Anne", Hoefkade 12) via
   `RolManager`; wisselen door te vegen in de profielkop.
 - **Chat (Regelen):** `Services/ClaudeService.swift`, model `claude-sonnet-5-5`.
-- **Laatste TestFlight-build:** 30, gebouwd vanaf de lokale branch `testflight-30`
-  (PR #13 + #10 samengevoegd; zie memory *testflight-deploy*).
+- **Laatste TestFlight-build:** 31, gebouwd vanaf de lokale branch `testflight-31`
+  (build 30 = PR #13 + #10, plus PR #14 buurtfilters in Versie 2; zie memory
+  *testflight-deploy*).
 
 ## Bouwen
 
