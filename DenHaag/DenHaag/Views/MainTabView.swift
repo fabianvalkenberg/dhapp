@@ -25,14 +25,10 @@ struct MainTabView: View {
     @State private var showBerichten = false
     @State private var showVergunningen = false
     @State private var showMeldingStatus = false
-    /// Testversie: bij openen eerst je naam (één keer per sessie en bij wisselen).
+    /// Versie 2 en testversie: bij openen eerst je naam (één keer per sessie en bij wisselen).
     @State private var vraagNaam = false
-    /// Versie 2 toont het naamscherm één keer (Beginnen of Overslaan telt allebei).
-    @AppStorage("naamGevraagdV2") private var naamGevraagdV2 = false
 
-    private func moetNaamVragen(_ v: AppVersie) -> Bool {
-        v.vraagtNaam || (v.vraagtNaamEenmalig && !naamGevraagdV2)
-    }
+    private func moetNaamVragen(_ v: AppVersie) -> Bool { v.vraagtNaam }
     @StateObject private var fietspassen = FietspasStore()
     @State private var fietspasVolScherm = false
     /// Onderwerp-filter dat een buurt-snelkoppel-tegel aanvraagt (nil = geen).
@@ -265,7 +261,6 @@ struct MainTabView: View {
         .animation(.easeInOut(duration: 0.35), value: showMeldingStatus)
         .fullScreenCover(isPresented: $vraagNaam) {
             NaamOnboardingView(settings: settings) {
-                if versie.current.vraagtNaamEenmalig { naamGevraagdV2 = true }
                 vraagNaam = false
             }
                 .environmentObject(lang)
@@ -319,7 +314,7 @@ struct MainTabView: View {
                 default: break
                 }
             }
-            // `-geennaam` slaat de naamvraag van de testversie over.
+            // `-geennaam` slaat de naamvraag over.
             if ProcessInfo.processInfo.arguments.contains("-geennaam") { return }
             #endif
             if moetNaamVragen(versie.current) { vraagNaam = true }
@@ -330,7 +325,7 @@ struct MainTabView: View {
             showSettings = false
             selectedTab = .home
             settings.setSelection(ids: PreferenceTile.standaard(voor: nieuw))
-            // Naar de testversie (of Versie 2, de eerste keer): eerst de naam vragen.
+            // Naar Versie 2 of de testversie: eerst de naam vragen.
             if moetNaamVragen(nieuw) { vraagNaam = true }
         }
         .onChange(of: selectedTab) { _, t in
