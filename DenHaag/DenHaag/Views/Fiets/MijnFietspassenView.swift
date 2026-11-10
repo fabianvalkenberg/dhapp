@@ -13,6 +13,9 @@ struct MijnFietspassenView: View {
     var onStallingen: () -> Void
 
     @State private var toonIntro = false
+    @State private var toonDappre = false
+    @AppStorage("dapprePopupGezien") private var dapprePopupGezien = false
+    @State private var toonDapprePopup = false
     @State private var toevoegen: ToevoegStart?
     @State private var detailID: UUID?
     /// De pas die groot open staat, met waar hij vandaan vloog en op welke schaal.
@@ -46,6 +49,12 @@ struct MijnFietspassenView: View {
                 .zIndex(1)
             }
 
+            if toonDappre {
+                FietspasDappreView(onTerug: { toonDappre = false })
+                    .transition(.move(edge: .trailing))
+                    .zIndex(1)
+            }
+
             if let id = detailID, let pas = store.passen.first(where: { $0.id == id }) {
                 FietspasDetailView(
                     store: store,
@@ -65,6 +74,7 @@ struct MijnFietspassenView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: toonIntro)
+        .animation(.easeInOut(duration: 0.3), value: toonDappre)
         .animation(.easeInOut(duration: 0.3), value: detailID)
         .fullScreenCover(item: $toevoegen) { start in
             FietspasToevoegenView(
@@ -80,6 +90,12 @@ struct MijnFietspassenView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                         withAnimation(.easeInOut(duration: 0.4)) { actieveID = nieuw.id }
                     }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        if !dapprePopupGezien {
+                            dapprePopupGezien = true
+                            toonDapprePopup = true
+                        }
+                    }
                 },
                 onNaarPas: { pas in
                     toevoegen = nil
@@ -88,6 +104,13 @@ struct MijnFietspassenView: View {
                 }
             )
             .environmentObject(lang)
+        }
+        .sheet(isPresented: $toonDapprePopup) {
+            DapprePopup(onSluit: { toonDapprePopup = false })
+                .environmentObject(lang)
+                .presentationDetents([.large])
+                .presentationCornerRadius(24)
+                .presentationDragIndicator(.visible)
         }
         .onAppear {
             AnalyticsService.screen("fietspassen")
@@ -211,6 +234,8 @@ struct MijnFietspassenView: View {
                 Button { detailID = pas.id } label: { pasRij(pas) }
                     .buttonStyle(.plain)
             }
+            Button { toonDappre = true } label: { dappreRij }
+                .buttonStyle(.plain)
         }
         .padding(.horizontal, AppDesign.horizontalPadding)
         .padding(.top, 20)
@@ -226,6 +251,33 @@ struct MijnFietspassenView: View {
                 Text("\(pas.code) · \(lang.t(pas.type.kleurBijvoeglijkKey)) \(lang.t("fp_pas"))")
                     .font(AppFont.theSans(size: 14, weight: .plain))
                     .foregroundColor(FietspasKleur.tekstZacht)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(AppColors.textPrimary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color(hex: "F4F3F0"))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .contentShape(Rectangle())
+    }
+
+    private var dappreRij: some View {
+        HStack(spacing: 12) {
+            Image("fp-dappre")
+                .resizable()
+                .frame(width: 40, height: 40)
+                .clipShape(RoundedRectangle(cornerRadius: 9))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(lang.t("dappre_titel"))
+                    .font(AppFont.theSans(size: 16, weight: .bold))
+                    .foregroundColor(AppColors.textPrimary)
+                Text(lang.t("dappre_onderregel"))
+                    .font(AppFont.theSans(size: 14, weight: .plain))
+                    .foregroundColor(FietspasKleur.tekstZacht)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: "chevron.right")

@@ -510,6 +510,21 @@ opbouw. De oude `FietspasScanView` en `FietspasGevondenView` zijn weg.
 - Mijn fietspassen verbergt de tabbalk zolang het open is (Figma heeft daar een
   vaste knop onderin).
 
+## 2026-11-10 · Fietsen flow 03: passen tonen en sparen met Dappre
+
+Figma "🚲 Fietsen", HKW Flows · MVP, flow 03. In Mijn fietspassen staat de
+laatst gebruikte pas (die je het laatst groot liet zien) vooraan, met onder de
+passen een rij "Sparen met Dappre". Die opent een uitlegscherm (drie stappen,
+"Download de Dappre app" opent dappre.com/download). Na het toevoegen van je
+eerste pas verschijnt dezelfde uitleg één keer als pop-up (`dapprePopupGezien`).
+Pas groot tonen (donker, helderheid omhoog, tik om te sluiten) bestond al.
+
+- **Niet gebouwd:** Apple Wallet (scherm 1, native); de Wallet-knop en -status
+  in de app zijn nagebootst.
+- Het Dappre-icoon (`fp-dappre`) is een 1x-export uit Figma en dus iets zacht.
+- De code van deze flow is geschreven door DeepSeek (via OpenModel) op een
+  opdracht van Claude, en door Claude gecontroleerd, gebouwd en getest.
+
 ## 2026-11-10 · Standaard Versie 2, met eenmalig naamscherm
 
 Op verzoek van Fabian. De app opent standaard in Versie 2 (was Versie 1 bij
