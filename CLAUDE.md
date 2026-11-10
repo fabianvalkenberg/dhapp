@@ -31,7 +31,8 @@ UI-teksten en toon: `docs/VOICE.md` · afwegingen zonder besluit:
 - **Rollen:** inwoner of ondernemer ("Kapsalon Anne", Hoefkade 12) via
   `RolManager`; wisselen door te vegen in de profielkop.
 - **Chat (Regelen):** `Services/ClaudeService.swift`, model `claude-sonnet-5-5`.
-- **Laatste TestFlight-build:** 29 (zie memory *testflight-deploy*).
+- **Laatste TestFlight-build:** 30, gebouwd vanaf de lokale branch `testflight-30`
+  (PR #13 + #10 samengevoegd; zie memory *testflight-deploy*).
 
 ## Bouwen
 
@@ -56,7 +57,9 @@ Launchen lukt niet als het toestel op slot staat (installeren wél).
 Testharnas (alleen DEBUG), als launch-argumenten bij `xcrun simctl launch`:
 `-versie v1|v2|v3|test` · `-rol inwoner|ondernemer` · `-geennaam` ·
 `-tab buurt|regelen|hulp` · `-scherm <naam>` (zie DECISIONS) · `-melding` · `-meldstap <intro|wat|waar|foto|onveilig|vervolg|contact|controle|klaar>`
-· `-meldcat <verlichting|auto|container|grofvuil|anders>` · `-fietspas` · `-zwemmen`.
+· `-meldcat <verlichting|auto|container|grofvuil|anders>` · `-fietspas` · `-zwemmen`
+· `-buurtfilter <onderwerp>` (bijv. `fietsparkeren`). Testcodes voor de
+foutschermen van "pas toevoegen" staan in DECISIONS.md (2026-11-10).
 
 ## Regels
 
@@ -75,7 +78,11 @@ Testharnas (alleen DEBUG), als launch-argumenten bij `xcrun simctl launch`:
 - ⚠️ Screenshot-bewijs via `xcrun simctl io <device-id> screenshot`. De
   screenshot van de simulator-tool kan een oud beeld tonen; geef die tool altijd
   het device-id mee, anders stuurt hij een ander toestel aan.
-- Feiten over plekken (adressen, coördinaten) worden opgezocht, niet geschat.
+- Feiten over plekken (adressen, coördinaten, fietstypen, voorzieningen) worden
+  opgezocht, niet geschat. Onbekend blijft onbekend en telt niet mee in een filter.
+- ⚠️ Werken meerdere sessies tegelijk aan deze repo: elke sessie een eigen
+  git-worktree én een eigen simulator. Nooit van branch wisselen in een map of
+  simulator die een andere sessie gebruikt.
 
 **Project en build**
 - ⚠️ Start nooit een lokale dev server — dit is een native iOS-app, geen web-app.
@@ -159,9 +166,13 @@ Korte portrait-video's die een onderwerp uitleggen, nu bij kwijtschelding.
       → #2–#8 design review → #9 pulsering → #10 Versie 2 standaard (op #9) en
       fietsen flow 01/02/03 (op #9). De oude lokale branches `main` en
       `werk-2026-11-07` bevatten een API-sleutel in de geschiedenis: **nooit pushen.**
-- [ ] Design review, nog open: tegels zelf ordenen en aanpassen op het
-      startscherm ("geen prio"), fietspas (eerst probleem/HKW/flow), en
-      "Geschikt voor" bij stallingen (geen gegevens per stalling).
+- [ ] Nog open uit design review en fietsendesign: tegels zelf ordenen en
+      aanpassen op het startscherm ("geen prio"); fietsen-flows 04 (hoe lang
+      staat mijn fiets) en 05 (pas blokkeren); Apple Wallet echt koppelen;
+      scherp Dappre-icoon aanleveren (`fp-dappre` is een 1x-export).
+- [ ] Ongemergde lokale restanten: branch `fietsen-02-pas-toevoegen` (oude WIP,
+      vervangen door `fietsen-02-passen-toevoegen`) en een lege werkkopie in een
+      tijdelijke map. Opruimen kan, maar alleen met Fabians akkoord.
 - [ ] Microfoon en fotokiezer in de meldflow zijn niet getest (kan niet in de
       simulator). Op het toestel nalopen.
 

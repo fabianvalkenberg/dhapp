@@ -51,3 +51,20 @@ groen gebleven. **Open:** klopt die lezing?
 - De testversie vraagt bij élke start je naam, ook als je die al gaf. Voor
   testsessies met steeds een nieuwe deelnemer is dat misschien juist goed.
 - De meldflow en de chat gebruiken "u", de rest van de app "je" (zie VOICE.md).
+
+## 2026-11-10 · Fietsendesign: wat we bewust níet overnamen
+
+- **Lijst-sheet onderin de kaart** (flow 01 scherm 3) tegenover de knoppen "5 in
+  de buurt" + "Lijst" uit de review van 9 november. Fabian koos de knoppen: één
+  patroon in heel Buurt. Het aparte sheet-concept stond in Figma al op "KILL
+  your darlings". Open: als testers de lijst niet vinden, komt de sheet terug.
+- **Nieuw stallingskaartje met kruisje** (flow 01 scherm 4): Fabian hield het
+  oude kaartje. "Past bij je bakfiets" staat daardoor alleen op de
+  stallingspagina, niet op het kaartje.
+- **Voordrager:** geen enkele bron (Biesieklette, denhaag.com) noemt het. De
+  filteroptie staat er daarom niet; navragen bij Biesieklette zou hem terugbrengen.
+- **Chiphoogte:** de review gebruikt 43 pt, het fietsendesign 36 pt. We hielden
+  43 voor heel Buurt; de designers moeten kiezen.
+- **Werkwijze bij krappe credits:** code laten schrijven door DeepSeek via
+  OpenModel (Otto), Claude controleert, bouwt en test. Werkte voor flow 03 in
+  één keer; het controleren kost nog steeds de meeste Claude-tokens (screenshots).

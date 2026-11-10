@@ -55,6 +55,10 @@ gebruikt.
 | je zaak (ondernemer) | je bedrijf, je onderneming |
 | Voor je zaak (buurtfilter) | Ondernemers, Zakelijk |
 | Zet morgen je oud papier buiten | Ophaaldag papier: morgen |
+| Fiets stallen | Fiets parkeren, fietsparkeren (behalve "voor klanten" bij ondernemer) |
+| fietspas, pas toevoegen | kaart, abonnement, pas registreren |
+| Hallo, (begroeting zonder naam, Versie 2) | Hi Anne, Beste inwoner |
+| Nu open · tot 03:00 / Nu gesloten | Geopend, Closed, open tot 3u |
 
 **Let op het verschil melding / aanvraag.** De Ombudsman stelde vast dat
 inwoners dat verschil niet begrijpen. Gebruik de woorden dus nooit door elkaar,
