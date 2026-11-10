@@ -460,3 +460,17 @@ van drie, loopt trager (3,2 s), reikt minder ver (150 i.p.v. 170) en is ongeveer
 half zo fel (`PulseHostView.configure(…, intensiteit: 0.55)`). De ademende halo
 om de stip beweegt minder (0,9–1,1) en is lichter. Bij nul intensiteit
 verdween de radar vrijwel, dat was te veel.
+
+## 2026-11-10 · Standaard Versie 2, met eenmalig naamscherm
+
+Op verzoek van Fabian. De app opent standaard in Versie 2 (was Versie 1 bij
+een nieuwe installatie, en vaak "Prototype testen" omdat die keuze bewaard
+bleef). Bij de eerste start na deze update zet de app eenmalig Versie 2;
+daarna blijft een eigen keuze op "Versie van de app" gewoon bewaard
+(`versieStandaardV2` in UserDefaults).
+
+Versie 2 toont het naamscherm één keer, vóór het persoonlijk startscherm
+(`naamGevraagdV2`). Beginnen geeft "Hi <naam>,", Overslaan geeft "Hallo,"
+(`home_hallo`); ook op Regelen. In Versie 1, 3 en "Prototype testen" is niets
+veranderd: die laatste vraagt de naam nog steeds bij elke start, en zonder
+naam staat er elders nog "Hi Anne,".

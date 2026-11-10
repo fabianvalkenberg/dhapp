@@ -27,6 +27,12 @@ struct MainTabView: View {
     @State private var showMeldingStatus = false
     /// Testversie: bij openen eerst je naam (één keer per sessie en bij wisselen).
     @State private var vraagNaam = false
+    /// Versie 2 toont het naamscherm één keer (Beginnen of Overslaan telt allebei).
+    @AppStorage("naamGevraagdV2") private var naamGevraagdV2 = false
+
+    private func moetNaamVragen(_ v: AppVersie) -> Bool {
+        v.vraagtNaam || (v.vraagtNaamEenmalig && !naamGevraagdV2)
+    }
     @StateObject private var fietspassen = FietspasStore()
     @State private var fietspasVolScherm = false
     /// Onderwerp-filter dat een buurt-snelkoppel-tegel aanvraagt (nil = geen).
@@ -258,7 +264,10 @@ struct MainTabView: View {
         .animation(.easeInOut(duration: 0.35), value: showVergunningen)
         .animation(.easeInOut(duration: 0.35), value: showMeldingStatus)
         .fullScreenCover(isPresented: $vraagNaam) {
-            NaamOnboardingView(settings: settings) { vraagNaam = false }
+            NaamOnboardingView(settings: settings) {
+                if versie.current.vraagtNaamEenmalig { naamGevraagdV2 = true }
+                vraagNaam = false
+            }
                 .environmentObject(lang)
         }
         .onChange(of: showMelding) { _, v in if v { AnalyticsService.track("open_melding") } }
@@ -313,7 +322,7 @@ struct MainTabView: View {
             // `-geennaam` slaat de naamvraag van de testversie over.
             if ProcessInfo.processInfo.arguments.contains("-geennaam") { return }
             #endif
-            if versie.current.vraagtNaam { vraagNaam = true }
+            if moetNaamVragen(versie.current) { vraagNaam = true }
         }
         .onChange(of: versie.current) { _, nieuw in
             // Sta je op een tab die de nieuwe versie niet heeft, dan terug naar home.
@@ -321,8 +330,8 @@ struct MainTabView: View {
             showSettings = false
             selectedTab = .home
             settings.setSelection(ids: PreferenceTile.standaard(voor: nieuw))
-            // Naar de testversie: eerst de naam vragen.
-            if nieuw.vraagtNaam { vraagNaam = true }
+            // Naar de testversie (of Versie 2, de eerste keer): eerst de naam vragen.
+            if moetNaamVragen(nieuw) { vraagNaam = true }
         }
         .onChange(of: selectedTab) { _, t in
             // Een andere tab kiezen sluit de fietspassen.
