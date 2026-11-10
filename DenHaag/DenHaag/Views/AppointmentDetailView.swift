@@ -3,6 +3,8 @@ import SwiftUI
 struct ChecklistItem: Identifiable {
     let id = UUID()
     let textKey: String
+    var subKey: String? = nil
+    var illustratie: String? = nil
     var isChecked: Bool = false
 }
 
@@ -31,13 +33,17 @@ struct AppointmentDetailView: View {
         "heart.fill", "sparkles", "checkmark.seal.fill", "bolt.fill"
     ]
 
+    // Design review 2026-11 (variant A): drie vaste punten met illustratie;
+    // aangifte en toestemming staan achter "Kwijt, gestolen of voor een kind?".
     @State private var checklist: [ChecklistItem] = [
-        ChecklistItem(textKey: "current_passport"),
-        ChecklistItem(textKey: "recent_photo"),
-        ChecklistItem(textKey: "loss_report"),
-        ChecklistItem(textKey: "consent_form"),
-        ChecklistItem(textKey: "payment_method"),
+        ChecklistItem(textKey: "mee_paspoort", illustratie: "ill-mee-paspoort"),
+        ChecklistItem(textKey: "mee_pasfoto", subKey: "mee_pasfoto_sub", illustratie: "ill-mee-pasfoto"),
+        ChecklistItem(textKey: "mee_betaal", subKey: "mee_betaal_sub", illustratie: "ill-mee-betaal"),
+        ChecklistItem(textKey: "mee_aangifte"),
+        ChecklistItem(textKey: "mee_toestemming", subKey: "mee_toestemming_sub"),
     ]
+    @State private var toonExtra = false
+    @Environment(\.openURL) private var openURL
 
     private var safeTop: CGFloat { AppDesign.safeAreaTop }
 
@@ -51,13 +57,13 @@ struct AppointmentDetailView: View {
                     // template als de paspoort- en aanvraag-pagina).
                     Color.clear.frame(height: safeTop + 44)
 
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(lang.t("your_appointment"))
                             .font(AppFont.theMix(size: 30, weight: .bold))
-                            .foregroundColor(AppColors.textPrimary)
+                            .foregroundColor(AppColors.darkGrey)
                         Text(lang.t("passport_request"))
-                            .font(AppFont.theSans(size: 16, weight: .plain))
-                            .foregroundColor(AppColors.textSecondary)
+                            .font(AppFont.theSans(size: 17, weight: .plain))
+                            .foregroundColor(Color(hex: "595959"))
                     }
 
                     if let bevestiging {
@@ -86,69 +92,16 @@ struct AppointmentDetailView: View {
                         }
                     }
 
-                    // Datum / tijd / locatie — netjes in één boxje
-                    VStack(spacing: 0) {
-                        plainInfoRow(icon: "calendar", label: lang.t("date"), value: AfspraakStore.dag(afspraak.datum).eersteHoofdletter)
-                            .padding(16)
-                        Rectangle().fill(AppColors.grijs2).frame(height: 1)
-                        plainInfoRow(icon: "clock", label: lang.t("time"), value: AfspraakStore.tijd(afspraak.datum), useSFSymbol: true)
-                            .padding(16)
-                        Rectangle().fill(AppColors.grijs2).frame(height: 1)
-                        plainInfoRow(icon: "location-pin", label: lang.t("location"), value: lang.t("appointment_location"))
-                            .padding(16)
+                    Group {
+                        wanneer
+                        waar
                     }
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppColors.grijs2, lineWidth: 1))
                     .opacity(afspraak.afgezegd ? 0.45 : 1)
 
-                    // Meenemen-checklist — het belangrijkste, dus een slag groter en
-                    // zonder lijntjes tussen de items.
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text(lang.t("make_sure_ready"))
-                            .font(AppFont.theSans(size: 17, weight: .plain))
-                            .foregroundColor(AppColors.textSecondary)
-                            .lineSpacing(4)
+                    neemMee
+                    kosten
+                    goedOmTeWeten
 
-                        VStack(spacing: 4) {
-                            ForEach(Array(checklist.enumerated()), id: \.element.id) { index, item in
-                                checklistRow(index: index, item: item)
-                            }
-                        }
-                    }
-
-                    // Kosten — nette borderloze tabel
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(lang.t("costs"))
-                            .font(AppFont.theMix(size: 22, weight: .bold))
-                            .foregroundColor(AppColors.textPrimary)
-
-                        VStack(spacing: 0) {
-                            costRow(label: lang.t("passport_adult"), value: lang.t("passport_price"))
-                            Rectangle().fill(AppColors.grijs2).frame(height: 1)
-                            costRow(label: lang.t("express_rate"), value: lang.t("express_price"))
-                        }
-                    }
-
-                    // Goed om te weten (blijft zoals het was — werkt goed)
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(lang.t("good_to_know"))
-                            .font(AppFont.theMix(size: 22, weight: .bold))
-                            .foregroundColor(AppColors.textPrimary)
-
-                        VStack(alignment: .leading, spacing: 12) {
-                            tipRow(text: lang.t("tip_on_time"))
-                            tipRow(text: lang.t("tip_validity"))
-                            tipRow(text: lang.t("tip_pickup"))
-                            tipRow(text: lang.t("tip_bring_old"))
-                        }
-                        .padding(20)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(AppColors.warmGrijs)
-                        .cornerRadius(8)
-                    }
-
-                    // Acties
                     if !afspraak.afgezegd {
                         VStack(spacing: 12) {
                             actionButton(title: lang.t("reschedule"), filled: true) { toonVerplaatsen = true }
@@ -199,10 +152,190 @@ struct AppointmentDetailView: View {
         }
     }
 
-    // MARK: - Checklist-rij (groter)
+    // MARK: - Blokken (Figma variant A "Overzicht")
+
+    private var datumDelen: (dag: String, nr: String, maand: String) {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: lang.current.rawValue)
+        func d(_ fmt: String) -> String {
+            f.dateFormat = fmt
+            return f.string(from: afspraak.datum).replacingOccurrences(of: ".", with: "")
+        }
+        return (d("EEE").lowercased(), d("d"), d("MMM").lowercased())
+    }
+
+    /// Wanneer: groen datumblok, volledige datum, tijd groot, "Zet in je agenda".
+    private var wanneer: some View {
+        HStack(alignment: .top, spacing: 16) {
+            VStack(spacing: 0) {
+                Text(datumDelen.dag).font(AppFont.theSans(size: 14, weight: .plain))
+                Text(datumDelen.nr).font(AppFont.theMix(size: 20, weight: .bold))
+                Text(datumDelen.maand).font(AppFont.theSans(size: 14, weight: .plain))
+            }
+            .foregroundColor(.white)
+            .frame(width: 64, height: 78)
+            .background(AppColors.groen3)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(AfspraakStore.dag(afspraak.datum).eersteHoofdletter)
+                    .font(AppFont.theSans(size: 17, weight: .bold))
+                    .foregroundColor(AppColors.darkGrey)
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(AppColors.groen3)
+                        .frame(width: 20, height: 20)
+                    Text(String(format: lang.t("afspraak_om"), AfspraakStore.tijd(afspraak.datum)))
+                        .font(AppFont.theMix(size: 22, weight: .bold))
+                        .foregroundColor(AppColors.darkGrey)
+                }
+                Button {
+                    // Prototype: nagebootst, er gaat niets naar je echte agenda.
+                    bevestiging = lang.t("afspraak_in_agenda_bev")
+                    AnalyticsService.track("afspraak_in_agenda")
+                } label: {
+                    Text(lang.t("afspraak_in_agenda"))
+                        .font(AppFont.theSans(size: 15, weight: .bold))
+                        .foregroundColor(AppColors.blauw3)
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .background(AppColors.warmGrijs)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    /// Waar: foto van de ingang + adres met Route.
+    private var waar: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            blokTitel(lang.t("afspraak_waar"))
+            VStack(spacing: 0) {
+                Image("stadhuis-spui")
+                    .resizable().scaledToFill()
+                    .frame(height: 150).frame(maxWidth: .infinity)
+                    .clipped()
+                HStack(spacing: 12) {
+                    Image("location-pin").renderingMode(.template).resizable().scaledToFit()
+                        .frame(width: 22, height: 22)
+                        .foregroundColor(AppColors.darkGrey)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(lang.t("afspraak_locatie_naam"))
+                            .font(AppFont.theSans(size: 16, weight: .bold))
+                            .foregroundColor(AppColors.darkGrey)
+                        Text(lang.t("afspraak_locatie_adres"))
+                            .font(AppFont.theSans(size: 15, weight: .plain))
+                            .foregroundColor(Color(hex: "595959"))
+                    }
+                    Spacer(minLength: 0)
+                    Button {
+                        let q = "Spui 70, 2511 BT Den Haag".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                        if let url = URL(string: "maps://?daddr=\(q)") { openURL(url) }
+                        AnalyticsService.track("afspraak_route")
+                    } label: {
+                        Text(lang.t("zw_route"))
+                            .font(AppFont.theSans(size: 16, weight: .bold))
+                            .foregroundColor(AppColors.groen3)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+            }
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "E8E6E2"), lineWidth: 1))
+        }
+    }
+
+    /// Neem dit mee: afvinklijst met illustraties; extra's achter een link.
+    private var neemMee: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            blokTitel(lang.t("afspraak_neem_mee"))
+            Text(lang.t("afspraak_vink_af"))
+                .font(AppFont.theSans(size: 16, weight: .plain))
+                .foregroundColor(Color(hex: "595959"))
+            VStack(spacing: 0) {
+                ForEach(Array(checklist.enumerated()), id: \.element.id) { index, item in
+                    if index < 3 || toonExtra {
+                        checklistRow(index: index, item: item)
+                            .transition(.opacity)
+                    }
+                }
+            }
+            if !toonExtra {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) { toonExtra = true }
+                } label: {
+                    HStack(alignment: .center, spacing: 6) {
+                        Text(lang.t("mee_extra_link"))
+                            .font(AppFont.theSans(size: 16, weight: .bold))
+                            .foregroundColor(AppColors.blauw3)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(AppColors.blauw3)
+                            .frame(width: 24, height: 24)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private var kosten: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            blokTitel(lang.t("costs"))
+            VStack(spacing: 0) {
+                costRow(label: lang.t("passport_adult"), value: lang.t("passport_price"))
+                Rectangle().fill(Color(hex: "E8E6E2")).frame(height: 1)
+                costRow(label: lang.t("express_rate"), value: lang.t("express_price"))
+            }
+            .padding(.horizontal, 16)
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "E8E6E2"), lineWidth: 1))
+        }
+    }
+
+    private var goedOmTeWeten: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            blokTitel(lang.t("good_to_know"))
+            tipRow(icoon: "clock", text: lang.t("afspraak_tip_tijd"))
+            tipRow(icoon: "calendar", text: lang.t("afspraak_tip_ophalen"))
+            Button {
+                if let url = URL(string: "https://www.denhaag.nl/nl/paspoort-en-identiteitskaart/paspoort-voor-volwassene-aanvragen/") {
+                    openURL(url)
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Text(lang.t("afspraak_meer_info"))
+                        .font(AppFont.theSans(size: 16, weight: .bold))
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 15, weight: .semibold))
+                        .frame(width: 24, height: 24)
+                }
+                .foregroundColor(AppColors.blauw3)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func blokTitel(_ t: String) -> some View {
+        Text(t)
+            .font(AppFont.theMix(size: 20, weight: .bold))
+            .foregroundColor(AppColors.darkGrey)
+    }
+
+    // MARK: - Checklist-rij
 
     private func checklistRow(index: Int, item: ChecklistItem) -> some View {
-        ZStack(alignment: .leading) {
+        ZStack(alignment: .trailing) {
             Button {
                 let wasChecked = checklist[index].isChecked
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -211,29 +344,52 @@ struct AppointmentDetailView: View {
                 if !wasChecked { triggerEmoji(at: index) }
             } label: {
                 HStack(spacing: 14) {
+                    Group {
+                        if let ill = item.illustratie {
+                            Image(ill).resizable().scaledToFit()
+                        } else {
+                            Image(systemName: "doc.text")
+                                .font(.system(size: 22))
+                                .foregroundColor(AppColors.blauw3)
+                        }
+                    }
+                    .frame(width: 44, height: 44)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(lang.t(item.textKey))
+                            .font(AppFont.theSans(size: 17, weight: .bold))
+                            .foregroundColor(item.isChecked ? AppColors.textSecondary : AppColors.darkGrey)
+                            .strikethrough(item.isChecked, color: AppColors.textSecondary)
+                        if let sub = item.subKey {
+                            Text(lang.t(sub))
+                                .font(AppFont.theSans(size: 15, weight: .plain))
+                                .foregroundColor(Color(hex: "595959"))
+                        }
+                    }
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                     ZStack {
                         Circle()
-                            .stroke(item.isChecked ? AppColors.groen3 : AppColors.grijs2, lineWidth: 1.5)
-                            .frame(width: 30, height: 30)
+                            .stroke(item.isChecked ? AppColors.groen3 : Color(hex: "999999"), lineWidth: 1.5)
+                            .frame(width: 26, height: 26)
                             .background(Circle().fill(item.isChecked ? AppColors.groen3 : Color.clear))
                         if item.isChecked {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 15, weight: .bold))
+                                .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(.white)
                                 .transition(.scale.combined(with: .opacity))
                         }
                     }
                     .scaleEffect(item.isChecked ? 1.1 : 1.0)
                     .animation(.spring(response: 0.3, dampingFraction: 0.5), value: item.isChecked)
-
-                    Text(lang.t(item.textKey))
-                        .font(AppFont.theSans(size: 18, weight: .semiBold))
-                        .foregroundColor(item.isChecked ? AppColors.textSecondary : AppColors.textPrimary)
-                        .strikethrough(item.isChecked, color: AppColors.textSecondary)
-                        .multilineTextAlignment(.leading)
-                    Spacer()
                 }
                 .padding(.vertical, 12)
+                .frame(minHeight: 69)
+                .contentShape(Rectangle())
+                .overlay(alignment: .bottom) {
+                    Rectangle().fill(Color(hex: "E8E6E2")).frame(height: 1)
+                }
             }
             .buttonStyle(.plain)
 
@@ -241,33 +397,27 @@ struct AppointmentDetailView: View {
                 Image(systemName: icon)
                     .font(.system(size: 24, weight: .medium))
                     .foregroundColor(AppColors.groen3)
-                    .offset(x: 0, y: emojiOffset)
+                    .offset(x: -1, y: emojiOffset)
                     .opacity(emojiOpacity)
                     .allowsHitTesting(false)
             }
         }
     }
 
+    /// Figma: gevuld groen 50 hoog, of rood omlijnd; tekst gecentreerd, 17 vet.
     private func actionButton(title: String, filled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 6) {
-                Text(title)
-                    .font(AppFont.theSans(size: 16, weight: .semiBold))
-                Spacer()
-                Image("arrow-right")
-                    .renderingMode(.template).resizable().scaledToFit()
-                    .frame(width: 16, height: 16)
-            }
-            .foregroundColor(filled ? .white : AppColors.rood)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .frame(maxWidth: .infinity)
-            .background(filled ? AppColors.groen3 : Color.white)
-            .cornerRadius(AppDesign.cornerRadius)
-            .overlay(
-                RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
-                    .stroke(filled ? Color.clear : AppColors.rood.opacity(0.3), lineWidth: 1)
-            )
+            Text(title)
+                .font(AppFont.theSans(size: 17, weight: .bold))
+                .foregroundColor(filled ? .white : Color(hex: "CC211A"))
+                .frame(maxWidth: .infinity)
+                .frame(height: filled ? 50 : 53)
+                .background(filled ? AppColors.groen3 : Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(filled ? Color.clear : Color(hex: "CC211A"), lineWidth: 1)
+                )
         }
         .buttonStyle(.plain)
     }
@@ -292,53 +442,27 @@ struct AppointmentDetailView: View {
 
     // MARK: - Losse rijen
 
-    private func plainInfoRow(icon: String, label: String, value: String, useSFSymbol: Bool = false) -> some View {
-        HStack(alignment: .top, spacing: 14) {
-            Group {
-                if useSFSymbol {
-                    Image(systemName: icon).font(.system(size: 17))
-                } else {
-                    Image(icon).renderingMode(.template).resizable().scaledToFit().frame(width: 20, height: 20)
-                }
-            }
-            .foregroundColor(AppColors.groen3)
-            .frame(width: 24, height: 24)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label)
-                    .font(AppFont.theSans(size: 14, weight: .plain))
-                    .foregroundColor(AppColors.textSecondary)
-                Text(value)
-                    .font(AppFont.theSans(size: 17, weight: .semiBold))
-                    .foregroundColor(AppColors.textPrimary)
-            }
-            Spacer()
-        }
-    }
-
     private func costRow(label: String, value: String) -> some View {
         HStack {
             Text(label)
-                .font(AppFont.theSans(size: 16, weight: .plain))
-                .foregroundColor(AppColors.textSecondary)
             Spacer()
             Text(value)
-                .font(AppFont.theSans(size: 16, weight: .semiBold))
-                .foregroundColor(AppColors.textPrimary)
         }
-        .padding(.vertical, 14)
+        .font(AppFont.theSans(size: 16, weight: .plain))
+        .foregroundColor(AppColors.darkGrey)
+        .padding(.vertical, 12)
     }
 
-    private func tipRow(text: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Circle()
-                .fill(AppColors.groen3)
-                .frame(width: 6, height: 6)
-                .padding(.top, 8)
+    private func tipRow(icoon: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icoon)
+                .font(.system(size: 18))
+                .foregroundColor(AppColors.groen3)
+                .frame(width: 22, height: 22)
             Text(text)
                 .font(AppFont.theSans(size: 16, weight: .plain))
-                .foregroundColor(AppColors.textSecondary)
-                .lineSpacing(4)
+                .foregroundColor(AppColors.darkGrey)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

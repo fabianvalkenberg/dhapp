@@ -31,7 +31,7 @@ UI-teksten en toon: `docs/VOICE.md` · afwegingen zonder besluit:
 - **Rollen:** inwoner of ondernemer ("Kapsalon Anne", Hoefkade 12) via
   `RolManager`; wisselen door te vegen in de profielkop.
 - **Chat (Regelen):** `Services/ClaudeService.swift`, model `claude-sonnet-5-5`.
-- **Laatste TestFlight-build:** 28 (zie memory *testflight-deploy*).
+- **Laatste TestFlight-build:** 29 (zie memory *testflight-deploy*).
 
 ## Bouwen
 
@@ -155,11 +155,18 @@ Korte portrait-video's die een onderwerp uitleggen, nu bij kwijtschelding.
 
 ## Open werk
 
-- [ ] De code van de sessie van 2026-11-03/04 is niet gecommit (plus
-      `docs/VOICE.md` en `docs/product.md`). Alleen de docs van 2026-11-07
-      staan in een commit, op de lokale branch `werk-2026-11-07`, die nog niet
-      gepusht is en geen remote-koppeling heeft. Volgens `docs/SAMENWERKEN.md`
-      hoort het op een eigen branch met een PR naar `main`.
+- [ ] **Nog niets gepusht; GitHub-repo `dhapp` is leeg en openbaar.** De oude
+      lokale branches `main` en `werk-2026-11-07` bevatten in de allereerste
+      commit bouwbestanden met de Claude-API-sleutel en bestanden > 100 MB:
+      **nooit pushen.** Schone basis: `main-schoon` (zelfde inhoud, zonder
+      bouwbestanden). Daarop gestapeld: `werk-3-4-november` → `review-hele-app`
+      → `review-home` → `review-onboarding` → `review-buurt` → `review-fietsen`
+      → `review-parkeren-hulp` → `review-afspraak` (design review 2026-11-09,
+      screenshots in `screens/review-2026-11/`). Wacht op Fabians akkoord om
+      `main-schoon` als `main` te pushen.
+- [ ] Design review, nog open: tegels zelf ordenen en aanpassen op het
+      startscherm ("geen prio"), fietspas (eerst probleem/HKW/flow), en
+      "Geschikt voor" bij stallingen (geen gegevens per stalling).
 - [ ] Microfoon en fotokiezer in de meldflow zijn niet getest (kan niet in de
       simulator). Op het toestel nalopen.
 
