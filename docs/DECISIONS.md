@@ -460,3 +460,24 @@ van drie, loopt trager (3,2 s), reikt minder ver (150 i.p.v. 170) en is ongeveer
 half zo fel (`PulseHostView.configure(…, intensiteit: 0.55)`). De ademende halo
 om de stip beweegt minder (0,9–1,1) en is lichter. Bij nul intensiteit
 verdween de radar vrijwel, dat was te veel.
+
+## 2026-11-10 · Fietsen flow 01: stallingen filteren (nieuw fietsendesign)
+
+Figma-pagina "🚲 Fietsen", HKW Flows · MVP, flow 01. Gebouwd: filterknop met
+teller vóór de chips (alleen bij Fiets stallen, en die chip staat dan vooraan),
+filterscherm als sheet (Je fiets, Openingstijden, Voorzieningen, actieve filters
+als tags, "Wis alles", "Toon N stallingen"), lijst met foto's, en "Geschikt
+voor" op de stallingspagina. "Fiets parkeren" heet nu overal "Fiets stallen".
+
+- **Niet overgenomen:** de lijst-sheet onderin de kaart (Fabian: knoppen uit de
+  review houden) en het nieuwe kaartje met kruisje (Fabian: kaartje blijft zoals
+  het was).
+- **Feiten:** opgezocht bij Biesieklette en denhaag.com, vastgelegd in
+  `StallingFeiten.swift`; ruwe bronnen in `docs/stallingen-feiten.json`. Wat niet
+  bevestigd is, is onbekend en valt buiten een filter. Voordrager wordt door geen
+  bron genoemd; die optie staat daarom niet in het filter.
+- **Onthouden:** het gekozen fietstype blijft bewaard. Zonder eerdere keuze worden
+  de typen uit je fietspassen voorgeselecteerd, behalve gewone fiets (past overal).
+- Voorzieningen die elke stalling heeft (bewaakt) staan niet als filteroptie.
+- Na toepassen zoomt de kaart naar jou plus de dichtstbijzijnde passende stalling.
+- Harnas: `-buurtfilter fietsparkeren`.

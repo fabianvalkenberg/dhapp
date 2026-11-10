@@ -62,7 +62,13 @@ struct BuurtLijstView: View {
 
     @ViewBuilder
     private func blok(_ item: NeighbourhoodItem) -> some View {
-        if item.plek != nil {
+        if let plek = item.plek, UIImage(named: plek.imageName) != nil {
+            // Figma fietsen (flow 01 scherm 5): foto van de stalling.
+            Image(plek.imageName)
+                .resizable().scaledToFill()
+                .frame(width: 52, height: 52)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+        } else if item.plek != nil {
             Image(systemName: item.type == .koffie ? "cup.and.saucer.fill" : "bicycle")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.white)

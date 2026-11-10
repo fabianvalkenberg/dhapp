@@ -1,0 +1,570 @@
+{
+  "bronnen_algemeen": [
+    "https://www.biesieklette.nl/fiets-stallen",
+    "https://denhaag.com/nl/doen/verkeer-en-vervoer/stallingen",
+    "https://www.denhaag.nl/nl/verkeer-en-vervoer/fietsen/gratis-en-bewaakt-uw-fiets-stallen-in-den-haag/"
+  ],
+  "toelichting": {
+    "fiets_fatbike": "biesieklette.nl heeft één vervoerscategorie 'Fiets & Fatbike' (omschrijving 'Reguliere fiets & fatbike'); alle 19 locaties hebben die. Fatbike is dus niet los te onderscheiden van gewone fiets.",
+    "voordrager": "Geen enkele bron noemt fietsen met voordrager; overal null.",
+    "bakfiets": "true als biesieklette.nl 'Bakfiets' bij de locatie noemt. null als alleen denhaag.com (standaardzin) het noemt en biesieklette.nl niet: bronnen in tegenspraak.",
+    "toilet": "Beide bronnen hebben een toiletveld; false = door geen van beide genoemd.",
+    "toegankelijk_toilet": "true alleen waar denhaag.com 'Openbaar (mindervalide) toilet' noemt; null bij een gewoon toilet zonder vermelding; false waar geen toilet is.",
+    "oplaadpunt": "true als beide bronnen het noemen; null bij tegenspraak.",
+    "fietspomp": "Alleen denhaag.com noemt 'Fietspomp'; biesieklette.nl heeft geen pomp-categorie. Niet genoemd = null, niet false.",
+    "bewaakt": "Algemeen afgeleid, niet per locatie gemeld: Biesieklette-locatiepagina's beschrijven dat 'de beheerder' de Bikey scant bij binnenkomst en vertrek; denhaag.nl noemt ze 'beheerde stallingen' en 'Gratis en bewaakte fietsenstalling'. Geldt binnen openingstijden.",
+    "opgehaald": "2026-11-10"
+  },
+  "stallingen": [
+    {
+      "naam": "Hobbemaplein",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": null,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/hobbemaplein",
+        "https://denhaag.com/nl/biesieklette-hobbemaplein"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, een bakfiets of een brommer komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter"
+      ],
+      "biesieklette_voorzieningen": [
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": "80 tweewielers (openlucht)",
+      "notitie": "Fietspomp: niet genoemd op denhaag.com, biesieklette.nl kent geen pomp-categorie."
+    },
+    {
+      "naam": "Groenteweg",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": null,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/groenteweg",
+        "https://denhaag.com/nl/biesieklette-groenteweg"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, een bakfiets of een brommer komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": "80 tweewielers (openlucht)",
+      "notitie": "Fietspomp: niet genoemd op denhaag.com, biesieklette.nl kent geen pomp-categorie."
+    },
+    {
+      "naam": "Grote Markt",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": true,
+      "toegankelijk_toilet": null,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/grote-markt",
+        "https://denhaag.com/nl/biesieklette-grote-markt"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, een bakfiets of een brommer komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Toilet",
+        "Uitgifte gele vuilniszakken",
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen",
+        "Fietslampjes automaat"
+      ],
+      "capaciteit_denhaag_com": "500 tweewielers",
+      "notitie": ""
+    },
+    {
+      "naam": "Driehoekjes",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": null,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": null,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/driehoekjes",
+        "https://denhaag.com/nl/biesieklette-driehoekjes"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets of een bakfiets, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": "100 fietsen",
+      "notitie": "Bakfiets: denhaag.com zegt welkom, biesieklette.nl noemt bakfiets niet bij deze locatie (alleen Fiets & Fatbike, Brommer & Scooter, Motor). Fietspomp: niet genoemd op denhaag.com, biesieklette.nl kent geen pomp-categorie."
+    },
+    {
+      "naam": "Nobelstraat",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": true,
+      "toegankelijk_toilet": null,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/nobelstraat",
+        "https://denhaag.com/nl/biesieklette-nobelstraat"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets"
+      ],
+      "biesieklette_voorzieningen": [
+        "Toilet",
+        "Uitgifte gele vuilniszakken",
+        "PostNL pakketpunt",
+        "Kluisjes",
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen",
+        "Fietslampjes automaat"
+      ],
+      "capaciteit_denhaag_com": "500 fietsen",
+      "notitie": ""
+    },
+    {
+      "naam": "Buitenhof",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": true,
+      "toegankelijk_toilet": null,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/buitenhof",
+        "https://denhaag.com/nl/biesieklette-buitenhof"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, een bakfiets of een brommer komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter"
+      ],
+      "biesieklette_voorzieningen": [
+        "Toilet",
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": "460 tweewielers (openlucht)",
+      "notitie": ""
+    },
+    {
+      "naam": "Noordeinde",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": null,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": false,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/noordeinde",
+        "https://denhaag.com/nl/biesieklette-noordeinde"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike"
+      ],
+      "biesieklette_voorzieningen": [],
+      "capaciteit_denhaag_com": "120 fietsen",
+      "notitie": "Bakfiets: denhaag.com zegt welkom, biesieklette.nl noemt bakfiets niet bij deze locatie (alleen Fiets & Fatbike)."
+    },
+    {
+      "naam": "Voldersgracht",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/voldersgracht",
+        "https://denhaag.com/nl/biesieklette-voldersgracht"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, een bakfiets of een brommer komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter"
+      ],
+      "biesieklette_voorzieningen": [
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": "200 tweewielers",
+      "notitie": ""
+    },
+    {
+      "naam": "Stadhuis",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": null,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/stadhuis",
+        "https://denhaag.com/nl/biesieklette-stadhuis"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Brommer & Scooter"
+      ],
+      "biesieklette_voorzieningen": [
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen",
+        "Fietslampjes automaat"
+      ],
+      "capaciteit_denhaag_com": "1.500 fietsen",
+      "notitie": "Bakfiets: denhaag.com zegt welkom, biesieklette.nl noemt bakfiets niet bij deze locatie (alleen Fiets & Fatbike, Brommer & Scooter)."
+    },
+    {
+      "naam": "Kranestraat",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/kranestraat",
+        "https://denhaag.com/nl/biesieklette-kranestraat"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, een bakfiets of een brommer komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Uitgifte gele vuilniszakken",
+        "PostNL pakketpunt",
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen",
+        "Fietslampjes automaat"
+      ],
+      "capaciteit_denhaag_com": "300 tweewielers",
+      "notitie": ""
+    },
+    {
+      "naam": "Plein (Korte Poten)",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/plein-korte-poten",
+        "https://denhaag.com/nl/biesieklette-korte-poten"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Uitgifte gele vuilniszakken",
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": "250 fietsen",
+      "notitie": ""
+    },
+    {
+      "naam": "Amare",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": null,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/amare",
+        "https://denhaag.com/nl/biesieklette-amare"
+      ],
+      "citaat": "biesieklette.nl vervoerstypen: Fiets & Fatbike, Bakfiets, Motor",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [],
+      "capaciteit_denhaag_com": null,
+      "notitie": "Oplaadpunt: denhaag.com noemt 'Gratis gebruik oplaadpunt e-bike', biesieklette.nl noemt 'Elektrisch opladen' niet bij deze locatie."
+    },
+    {
+      "naam": "Rijnstraat (Fietsflat)",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": null,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": null,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/rijnstraat-fietsflat",
+        "https://denhaag.com/nl/biesieklette-rijnstraat"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Innamepunt lege cartridges"
+      ],
+      "capaciteit_denhaag_com": "4.100 fietsen",
+      "notitie": "Bakfiets: denhaag.com zegt welkom, biesieklette.nl noemt bakfiets niet bij deze locatie (alleen Fiets & Fatbike, Brommer & Scooter, Motor). Oplaadpunt: denhaag.com noemt 'Gratis gebruik oplaadpunt e-bike', biesieklette.nl noemt 'Elektrisch opladen' niet bij deze locatie."
+    },
+    {
+      "naam": "Anna van Buerenstraat",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/anna-van-buerenstraat",
+        "https://denhaag.com/nl/biesieklette-anna-van-buerenstraat"
+      ],
+      "citaat": "biesieklette.nl vervoerstypen: Fiets & Fatbike, Bakfiets, Brommer & Scooter, Motor",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": null,
+      "notitie": ""
+    },
+    {
+      "naam": "Leyweg",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/leyweg",
+        "https://denhaag.com/nl/biesieklette-leyweg"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, een bakfiets of een brommer komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": "150 tweewielers",
+      "notitie": ""
+    },
+    {
+      "naam": "Strandweg-Haven",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": true,
+      "toegankelijk_toilet": true,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/strandweg-haven",
+        "https://denhaag.com/nl/biesieklette-strandweg-haven"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Strandrolstoel",
+        "Toilet",
+        "Uitgifte gele vuilniszakken",
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen",
+        "Elektrische strandrolstoel",
+        "Lig strandrolstoel",
+        "Kinder strandrolstoel",
+        "Tandem",
+        "Rolstoelfiets"
+      ],
+      "capaciteit_denhaag_com": "250 fietsen",
+      "notitie": "denhaag.com: 'Openbaar (mindervalide) toilet'."
+    },
+    {
+      "naam": "Palaceplein",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": false,
+      "toegankelijk_toilet": false,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/palaceplein",
+        "https://denhaag.com/nl/biesieklette-palaceplein"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets"
+      ],
+      "biesieklette_voorzieningen": [
+        "Elektrisch opladen"
+      ],
+      "capaciteit_denhaag_com": null,
+      "notitie": ""
+    },
+    {
+      "naam": "Noordboulevard",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": true,
+      "toegankelijk_toilet": true,
+      "oplaadpunt": null,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/noord-boulevard",
+        "https://denhaag.com/nl/biesieklette-noord-boulevard"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets"
+      ],
+      "biesieklette_voorzieningen": [
+        "Strandrolstoel",
+        "Toilet",
+        "Kluisjes",
+        "Elektrische strandrolstoel",
+        "Tillift",
+        "Baby verschoon tafel"
+      ],
+      "capaciteit_denhaag_com": "545 fietsen",
+      "notitie": "Oplaadpunt: denhaag.com noemt 'Gratis gebruik oplaadpunt e-bike', biesieklette.nl noemt 'Elektrisch opladen' niet bij deze locatie. denhaag.com: 'Openbaar (mindervalide) toilet'."
+    },
+    {
+      "naam": "Kijkduin",
+      "fiets": true,
+      "fatbike": true,
+      "bakfiets": true,
+      "voordrager": null,
+      "toilet": true,
+      "toegankelijk_toilet": true,
+      "oplaadpunt": true,
+      "fietspomp": true,
+      "bewaakt": true,
+      "bron": [
+        "https://www.biesieklette.nl/locaties/kijkduin",
+        "https://denhaag.com/nl/biesieklette-kijkduin"
+      ],
+      "citaat": "Of je nou op een gewone fiets, een elektrische fiets, of een bakfiets komt, er is voldoende ruimte.",
+      "biesieklette_vervoerstypen": [
+        "Fiets & Fatbike",
+        "Bakfiets",
+        "Brommer & Scooter",
+        "Motor"
+      ],
+      "biesieklette_voorzieningen": [
+        "Strandrolstoel",
+        "Toilet",
+        "Innamepunt lege cartridges",
+        "Elektrisch opladen",
+        "Lig strandrolstoel"
+      ],
+      "capaciteit_denhaag_com": "honderden fietsen",
+      "notitie": "denhaag.com: 'Openbaar (mindervalide) toilet'."
+    }
+  ]
+}
