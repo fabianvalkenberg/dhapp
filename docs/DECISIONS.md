@@ -474,3 +474,16 @@ Versie 2 toont het naamscherm één keer, vóór het persoonlijk startscherm
 (`home_hallo`); ook op Regelen. In Versie 1, 3 en "Prototype testen" is niets
 veranderd: die laatste vraagt de naam nog steeds bij elke start, en zonder
 naam staat er elders nog "Hi Anne,".
+
+## 2026-11-10 · Versie 2 vraagt de naam bij élke start
+
+Terugkoppeling van een collega na build 31: de app sloeg het naamscherm over.
+Oorzaak: Versie 2 vroeg de naam maar één keer per toestel (`naamGevraagdV2`).
+Wie build 30 al had geopend, kreeg het scherm daarna nooit meer, ook niet na
+de update.
+
+Nu gedraagt Versie 2 zich als "Prototype testen": bij elk openen van de app
+(en bij het kiezen van Versie 2) eerst het naamscherm, met een leeg veld. Zo
+begint elke nieuwe deelnemer bij zijn eigen naam. De vlag `naamGevraagdV2`
+wordt niet meer gelezen; een oude waarde op een toestel doet dus niets meer.
+Overslaan geeft nog steeds "Hallo,".

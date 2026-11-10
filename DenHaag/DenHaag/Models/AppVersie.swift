@@ -66,10 +66,9 @@ enum AppVersie: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Bij de testversie vraagt de app bij élk openen eerst je naam.
-    var vraagtNaam: Bool { self == .test }
-    /// Versie 2 vraagt de naam één keer; daarna onthoudt de app hem.
-    var vraagtNaamEenmalig: Bool { self == .v2 }
+    /// Versie 2 en de testversie vragen bij élk openen eerst je naam, zodat
+    /// elke nieuwe deelnemer bij het naamscherm begint.
+    var vraagtNaam: Bool { self == .v2 || self == .test }
 
     /// Een home-tegel bestaat alleen als het scherm erachter in deze versie zit.
     func allowsTile(_ id: String) -> Bool {
