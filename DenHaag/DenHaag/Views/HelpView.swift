@@ -267,6 +267,13 @@ struct HelpLocationCarousel: View {
                 )
                 .frame(width: 330)
             }
+            .scrollTargetLayout()
         }
+        // Design review ("Peak effect"): de carrousel loopt door tot de
+        // schermrand, zodat het volgende kaartje uitnodigt om te swipen. Het
+        // eerste kaartje blijft op het grid.
+        .contentMargins(.horizontal, AppDesign.horizontalPadding, for: .scrollContent)
+        .scrollTargetBehavior(.viewAligned)
+        .padding(.horizontal, -AppDesign.horizontalPadding)
     }
 }

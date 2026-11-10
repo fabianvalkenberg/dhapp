@@ -421,3 +421,19 @@ feiten over plekken verzinnen we niet. Terugzetten zodra ze er zijn.
 
 De fietspas zelf is niet aangepast: volgens de review eerst probleem, HKW en
 user story, dan de flow.
+
+## 2026-11-09 · Parkeren-kaartje op het grid, Hulp-carrousel tot de rand
+
+"Sessiekaartje niet in het grid": een decoratieve ellips van 420 pt maakte de
+hele parkeerkop breder dan het scherm, waardoor alles erin ~9 pt naar rechts
+schoof. De ellips is nu een achtergrond; het kaartje staat op 20/20.
+
+"Peak effect" (Hulp): de carrousel "Hulp in de buurt" werd op de kantlijn
+afgesneden. Hij loopt nu door tot de schermrand, met het eerste kaartje op het
+grid (`contentMargins`).
+
+## 2026-11-09 · Lijstrijen helemaal tikbaar (gevonden tijdens de review)
+
+`ItemListView` reageerde alleen op icoon, tekst en pijl; tikken op de lege
+ruimte in een rij deed niets. Daardoor leken o.a. de veelgestelde vragen in
+Hulp niet te werken. Opgelost met `contentShape` op de rij.

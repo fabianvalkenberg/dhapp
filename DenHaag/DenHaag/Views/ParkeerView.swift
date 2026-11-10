@@ -147,10 +147,6 @@ struct ParkeerPageView: View {
 
                             // Illustration — curve overlay covers bottom ~40px
                             ZStack(alignment: .bottom) {
-                                Ellipse()
-                                    .fill(Color(hex: "C8D8E8"))
-                                    .frame(width: 420, height: 45)
-
                                 ZStack {
                                     Image("parkeer-bord")
                                         .resizable()
@@ -167,6 +163,15 @@ struct ParkeerPageView: View {
                                         .offset(x: 20 + carOffsetX, y: 10)
                                 }
                                 .padding(.bottom, 10)
+                            }
+                            // De ellips is breder dan het scherm. Als achtergrond telt hij
+                            // niet mee voor de breedte; als gewoon kind duwde hij de hele
+                            // kop (en het sessiekaartje) 9 pt naar rechts (design review).
+                            .frame(maxWidth: .infinity)
+                            .background(alignment: .bottom) {
+                                Ellipse()
+                                    .fill(Color(hex: "C8D8E8"))
+                                    .frame(width: 420, height: 45)
                             }
                             .frame(height: 168)
                             .padding(.bottom, 30)
