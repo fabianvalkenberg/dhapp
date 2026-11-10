@@ -299,7 +299,8 @@ struct HeaderView: View {
 
     private var greetingText: String {
         // Als ondernemer de naam van je zaak; anders "Hi <naam>," (valt terug op Anne).
-        rol.isOndernemer ? lang.t("ond_business_name") : "Hi \(settings.greetingName),"
+        rol.isOndernemer ? lang.t("ond_business_name")
+            : HomeSettingsModel.begroeting(naam: settings.userName, versie: versie.current, lang: lang)
     }
 
     private var subregel: String {
