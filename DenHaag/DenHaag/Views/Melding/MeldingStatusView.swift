@@ -79,10 +79,10 @@ struct MeldingStatusView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
 
             BackCircleButton { withAnimation(.easeInOut(duration: 0.3)) { isPresented = false } }
-                .padding(.leading, AppDesign.horizontalPadding)
-                .padding(.top, safeTop + 6)
+                .terugknopPlek()
         }
         .ignoresSafeArea(edges: .top)
         .onAppear { AnalyticsService.screen("melding_status") }

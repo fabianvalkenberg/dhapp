@@ -55,7 +55,7 @@ Launchen lukt niet als het toestel op slot staat (installeren wél).
 
 Testharnas (alleen DEBUG), als launch-argumenten bij `xcrun simctl launch`:
 `-versie v1|v2|v3|test` · `-rol inwoner|ondernemer` · `-geennaam` ·
-`-tab buurt` · `-melding` · `-meldstap <intro|wat|waar|foto|onveilig|vervolg|contact|controle|klaar>`
+`-tab buurt|regelen|hulp` · `-scherm <naam>` (zie DECISIONS) · `-melding` · `-meldstap <intro|wat|waar|foto|onveilig|vervolg|contact|controle|klaar>`
 · `-meldcat <verlichting|auto|container|grofvuil|anders>` · `-fietspas` · `-zwemmen`.
 
 ## Regels
@@ -99,7 +99,9 @@ Testharnas (alleen DEBUG), als launch-argumenten bij `xcrun simctl launch`:
   `connectedScenes` uitrekenen.
 - Kleuren en fonts via `AppColors` / `AppFont` (`Models/AppTheme.swift`);
   spacing via `AppDesign.horizontalPadding` / `cornerRadius`.
-- Detail-schermen: paginatitel scrollt mee, back-knop via `BackCircleButton`.
+- Detail-schermen: paginatitel scrollt mee, back-knop via `BackCircleButton(stijl:)`
+  + `.terugknopPlek()`; nooit een eigen terugknop bouwen. Scrollende schermen
+  krijgen `.bovenVervaging()` op hun ScrollView.
 - Home-tegels en onboarding gebruiken illustraties (`ill-*`); buurt-kaarten
   gebruiken echte foto's (`foto-*`). Voorkeuren-chips in de onboarding zijn
   tekst-only.

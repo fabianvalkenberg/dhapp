@@ -63,12 +63,13 @@ struct ZwPaginaTitel: View {
 
 /// Zwevende terugknop linksboven; optioneel een tweede knop rechts.
 struct ZwTerugBalk<Rechts: View>: View {
+    var stijl: BackCircleButton.Stijl = .wit
     let actie: () -> Void
     @ViewBuilder var rechts: Rechts
 
     var body: some View {
         HStack {
-            BackCircleButton(action: actie)
+            BackCircleButton(stijl: stijl, action: actie)
             Spacer()
             rechts
         }
@@ -78,7 +79,9 @@ struct ZwTerugBalk<Rechts: View>: View {
 }
 
 extension ZwTerugBalk where Rechts == EmptyView {
-    init(actie: @escaping () -> Void) { self.actie = actie; self.rechts = EmptyView() }
+    init(stijl: BackCircleButton.Stijl = .wit, actie: @escaping () -> Void) {
+        self.stijl = stijl; self.actie = actie; self.rechts = EmptyView()
+    }
 }
 
 struct ZwSectie<Inhoud: View>: View {

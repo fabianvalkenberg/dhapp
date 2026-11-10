@@ -86,10 +86,10 @@ struct PaspoortAanvraagView: View {
                 .padding(.horizontal, AppDesign.horizontalPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .bovenVervaging()
 
-            BackCircleButton(action: { isPresented = false })
-                .padding(.leading, AppDesign.horizontalPadding)
-                .padding(.top, AppDesign.safeAreaTop + 6)
+            BackCircleButton { isPresented = false }
+                .terugknopPlek(binnenSafeArea: true)
         }
     }
 

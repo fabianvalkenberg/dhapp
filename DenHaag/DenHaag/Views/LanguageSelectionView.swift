@@ -73,18 +73,10 @@ struct LanguageSelectionView: View {
 
             // Back button
             HStack {
-                Button {
+                BackCircleButton(stijl: .wit) {
                     withAnimation(.easeInOut(duration: 0.25)) {
                         isPresented = false
                     }
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(AppColors.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .shadow(color: Color.black.opacity(0.08), radius: 4, y: 2)
                 }
                 Spacer()
             }

@@ -74,7 +74,7 @@ struct UitgangspuntenView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     // Compact top bar area
-                    Color.clear.frame(height: safeTop + 56)
+                    Color.clear.frame(height: AppDesign.terugknopTop + BackCircleButton.maat + 5)
 
                     // Card carousel
                     let cardWidth = UIScreen.main.bounds.width - 48
@@ -113,19 +113,11 @@ struct UitgangspuntenView: View {
                     Spacer().frame(height: 60)
                 }
             }
+            .bovenVervaging()
 
             // Top bar with back button and title
             HStack(spacing: 12) {
-                Button {
-                    isPresented = false
-                } label: {
-                    Image("arrow-left")
-                        .renderingMode(.template)
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(AppColors.textPrimary)
-                        .padding(8)
-                }
+                BackCircleButton(stijl: .wit) { isPresented = false }
 
                 Text(lang.t("ug_title"))
                     .font(AppFont.theMix(size: 18, weight: .bold))
@@ -134,7 +126,8 @@ struct UitgangspuntenView: View {
                 Spacer()
             }
             .padding(.horizontal, AppDesign.horizontalPadding)
-            .padding(.top, safeTop + 8)
+            // Dit scherm staat al onder de statusbalk: alleen de 8 pt erbij.
+            .padding(.top, AppDesign.terugknopTop)
             .background(
                 AppColors.background
                     .ignoresSafeArea(edges: .top)

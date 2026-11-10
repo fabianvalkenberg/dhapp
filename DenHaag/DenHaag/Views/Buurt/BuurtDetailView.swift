@@ -74,11 +74,11 @@ struct BuurtDetailView: View {
                 }
                 .frame(width: UIScreen.main.bounds.width)
             }
+            .bovenVervaging()
             .ignoresSafeArea(edges: .top)
 
-            backButton
-                .padding(.leading, AppDesign.horizontalPadding)
-                .padding(.top, safeTop)
+            BackCircleButton(stijl: .foto) { dismiss() }
+                .terugknopPlek(binnenSafeArea: true)
         }
     }
 
@@ -236,20 +236,5 @@ struct BuurtDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: AppDesign.cornerRadius))
         }
         .buttonStyle(PressableScaleStyle())
-    }
-
-    private var backButton: some View {
-        Button {
-            dismiss()
-        } label: {
-            Image(systemName: "chevron.left")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(AppColors.darkGrey)
-                .frame(width: 44, height: 44)
-                .background(Color.white)
-                .clipShape(Circle())
-                .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-        }
-        .buttonStyle(.plain)
     }
 }

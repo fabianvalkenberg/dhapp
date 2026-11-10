@@ -109,11 +109,11 @@ struct AanvraagDetailView: View {
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
+            .bovenVervaging()
 
             // Zwevende back-knop (titel scrollt eronder weg) — zelfde patroon overal.
             BackCircleButton { isPresented = false }
-                .padding(.leading, AppDesign.horizontalPadding)
-                .padding(.top, safeTop + 6)
+                .terugknopPlek(binnenSafeArea: true)
         }
     }
 

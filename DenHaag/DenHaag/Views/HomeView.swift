@@ -135,6 +135,7 @@ struct HomeView: View {
                     }
                 )
             }
+            .bovenVervaging()
             .coordinateSpace(name: "scroll")
             .onPreferenceChange(ScrollOffsetKey.self) { value in
                 scrollOffset = value

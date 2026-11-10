@@ -42,8 +42,9 @@ struct FeedbackView: View {
                     BackCircleButton { back() }
                     Spacer()
                 }
-                .padding(.horizontal, AppDesign.horizontalPadding)
-                .padding(.top, safeTop + 8)
+                // Horizontale marge komt van de VStack eromheen.
+                // Dit scherm staat al onder de statusbalk: alleen de 8 pt erbij.
+                .padding(.top, AppDesign.terugknopTop)
 
                 // Stap-inhoud
                 ZStack {

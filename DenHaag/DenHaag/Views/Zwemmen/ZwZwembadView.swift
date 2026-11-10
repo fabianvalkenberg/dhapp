@@ -26,7 +26,8 @@ struct ZwZwembadView: View {
                     .padding(.bottom, 80)
                 }
             }
-            ZwTerugBalk(actie: { model.terug() }) {
+            .bovenVervaging()
+            ZwTerugBalk(stijl: .foto, actie: { model.terug() }) {
                 Button {
                     model.mijnZwembad = favoriet ? nil : naam
                 } label: {
