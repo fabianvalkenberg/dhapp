@@ -58,6 +58,7 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSCameraUsageDescription: "Den Haag gebruikt je camera alleen om de QR-code op je fietspas te scannen."
         NSMicrophoneUsageDescription: "Den Haag gebruikt je microfoon voor spraakherkenning zodat je je vraag kunt inspreken."
         NSSpeechRecognitionUsageDescription: "Den Haag gebruikt spraakherkenning om je gesproken vraag om te zetten naar tekst."
     settings:

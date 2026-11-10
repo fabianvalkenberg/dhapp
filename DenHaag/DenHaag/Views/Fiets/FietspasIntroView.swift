@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// "Hoe kom ik aan een fietspas?" Niet in Figma; zelfde stijl als C4.
-/// Drie stappen, de pastypes met hun kleur, en door naar de kaart of de scanner.
+/// "Zo kom je aan een fietspas" (Figma fietsen, flow 02 scherm 3b): drie stappen,
+/// de pastypes met hun kleur, en door naar de scanner of de kaart.
 struct FietspasIntroView: View {
     @EnvironmentObject var lang: LanguageManager
     var onTerug: () -> Void
@@ -18,7 +18,7 @@ struct FietspasIntroView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            AppColors.warmGrijs.ignoresSafeArea()
+            Color.white.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 12) {
@@ -52,6 +52,7 @@ struct FietspasIntroView: View {
                     }
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.grijs2, lineWidth: 1))
 
                     // Pastypes: de kleur onderaan je pas hoort bij je voertuig.
                     VStack(alignment: .leading, spacing: 12) {
@@ -85,18 +86,19 @@ struct FietspasIntroView: View {
                     .padding(16)
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppColors.grijs2, lineWidth: 1))
 
-                    FietspasHoofdknop(titel: lang.t("fp_scan_knop"), action: onScan)
+                    FietspasHoofdknop(titel: lang.t("fp2_intro_scannen"), action: onScan)
                         .padding(.top, 12)
                     FietspasOmlijndeKnop(titel: lang.t("fp_intro_kaart"), action: onStallingen)
 
-                    Spacer().frame(height: 130)
+                    Spacer().frame(height: 40)
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
             }
 
             HStack(spacing: 12) {
-                FietspasRondeKnop(icoon: "fp-terug", grootte: 22, action: onTerug)
+                BackCircleButton(action: onTerug)
                 Text(lang.t("fp_intro_title"))
                     .font(AppFont.theMix(size: 24, weight: .bold))
                     .foregroundColor(AppColors.textPrimary)
@@ -104,9 +106,9 @@ struct FietspasIntroView: View {
                     .minimumScaleFactor(0.8)
             }
             .padding(.horizontal, AppDesign.horizontalPadding)
-            .padding(.top, safeTop + 8)
+            .padding(.top, safeTop + AppDesign.terugknopTop)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(AppColors.warmGrijs.frame(height: safeTop + 60).offset(y: -8), alignment: .top)
+            .background(Color.white.frame(height: safeTop + 60).offset(y: -8), alignment: .top)
         }
         .ignoresSafeArea(edges: .top)
         .onAppear { AnalyticsService.screen("fietspas_intro") }

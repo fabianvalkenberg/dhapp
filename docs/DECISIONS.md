@@ -481,3 +481,31 @@ voor" op de stallingspagina. "Fiets parkeren" heet nu overal "Fiets stallen".
 - Voorzieningen die elke stalling heeft (bewaakt) staan niet als filteroptie.
 - Na toepassen zoomt de kaart naar jou plus de dichtstbijzijnde passende stalling.
 - Harnas: `-buurtfilter fietsparkeren`.
+
+## 2026-11-10 · Fietsen flow 02: fietspas toevoegen (nieuw fietsendesign)
+
+Figma "🚲 Fietsen", HKW Flows · MVP, flow 02. Nieuw stapscherm
+`FietspasToevoegenView` (camera-uitleg, scannen, geen camera, code intypen,
+"Is dit je pas?", foutschermen, "Pas toegevoegd"); Mijn fietspassen, de
+uitleg ("Zo kom je aan een fietspas") en het pasdetail volgen de nieuwe
+opbouw. De oude `FietspasScanView` en `FietspasGevondenView` zijn weg.
+
+- **Camera:** de toestemming is echt (iOS-vraag, met uitleg vooraf alleen de
+  eerste keer; geweigerd → "De app mag je camera niet gebruiken" met een link
+  naar Instellingen). Het scannen zelf is nagebootst: na ~2,5 s "vindt" de app
+  een pas (steeds een type dat je nog niet hebt).
+- **Apple Wallet:** nagebootst. De knop zet alleen een vlag ("Staat in je
+  Wallet"); er wordt geen echte pas gemaakt.
+- **Code intypen:** hoofdletters en spaties maken niet uit. Haagse passen
+  gebruiken geen O, 0, I of 1, dus zo'n code (of een code die geen 7 tekens
+  heeft) geeft "We vinden geen pas met deze code". Wat je typte blijft staan.
+- **Testcodes voor een test of demo:** een code die al in de app staat →
+  "Deze pas staat al in je app"; `XYZ9B9B` → "Deze pas is geblokkeerd";
+  `XYZ9A9A` → "Deze pas staat al in een andere app". De zoeker lang indrukken
+  → "Dit is geen fietspas".
+- "Neem contact op" opent de stallingspagina van Biesieklette (beheerder van de
+  stallingen en passen); een telefoonnummer is nog niet uitgezocht.
+- Favoriet (ster) uit het oude ontwerp is vervallen; de nieuwe flow heeft het
+  niet. Blokkeren (HKW 05) volgt; nu een melding dat het nog niet kan.
+- Mijn fietspassen verbergt de tabbalk zolang het open is (Figma heeft daar een
+  vaste knop onderin).
