@@ -8,6 +8,12 @@ struct BuurtView: View {
 
     enum LocationMode { case thuis, werk }
 
+    /// Design review 2026-11 ("Kaartjes bedekken de kaart", "Geen lijstweergave"):
+    /// standaard alleen de kaart; kaartjes tonen na een tik op een marker of op
+    /// "5 in de buurt"; daarnaast een lijst.
+    enum Weergave { case kaart, kaartjes, lijst }
+    @State private var weergave: Weergave = .kaart
+
     /// Vaste volgorde + labels van de buurt-onderwerpen (matcht de onboarding-chips,
     /// afvalkalender staat bewust niet op de kaart).
     static let topicOrder = ["ondernemen", "evenementen", "sport", "wegwerk", "bouwplannen", "participatie", "fietsparkeren", "koffie"]
@@ -138,16 +144,31 @@ struct BuurtView: View {
                     .frame(height: 84)
                     .allowsHitTesting(false)
 
+                if weergave == .lijst {
+                    BuurtLijstView(items: filteredItems, vanaf: homeCoordinate) { item in
+                        kiesUitLijst(item)
+                    }
+                    // Onder de chips (die tot 27 pt onder de naad lopen) + 12 pt.
+                    .padding(.top, 39)
+                    .background(AppColors.background)
+                    .transition(.opacity)
+                }
+
                 // Chips op de naad: half op de witte header, half op de kaart.
                 filterChips
                     .padding(.top, 12)
                     .offset(y: -28)
 
-                VStack {
+                VStack(spacing: 4) {
                     Spacer()
-                    carousel
-                        .padding(.bottom, 95) // 15px lager dan voorheen (was 110)
+                    if weergave == .kaartjes {
+                        carousel
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                    onderknoppen
                 }
+                // Figma: knoppen 16 pt boven de tabbalk.
+                .padding(.bottom, 115)
             }
         }
         .background(AppColors.background)
@@ -164,7 +185,7 @@ struct BuurtView: View {
             requestedFilter = nil  // verzoek verwerkt; weer leeg voor de volgende keer
         }
         .onChange(of: selectedItemID) { _, newID in
-            guard let newID else { return }
+            guard let newID, weergave != .lijst else { return }
             if scrolledID != newID {
                 withAnimation { scrolledID = newID }
             }
@@ -296,7 +317,10 @@ struct BuurtView: View {
             homeCoordinate: homeCoordinate,
             selectedItemID: $selectedItemID,
             region: cameraRegion,
-            regionVersion: cameraVersion
+            regionVersion: cameraVersion,
+            // Tik op de kaart: kaartjes inklappen ("5 in de buurt").
+            onKaartTik: { if weergave == .kaartjes { zet(.kaart) } },
+            onMarkerTik: { if weergave != .kaartjes { zet(.kaartjes) } }
         )
     }
 
@@ -315,6 +339,8 @@ struct BuurtView: View {
                     }
                 }
                 .padding(.horizontal, AppDesign.horizontalPadding)
+                // Lucht boven en onder: anders knipt de scrollview de rand af.
+                .padding(.vertical, 2)
             }
             // Een filter dat van buiten is gezet (home-tegel) kan buiten beeld
             // staan; schuif de gekozen chip dan in beeld.
@@ -338,19 +364,107 @@ struct BuurtView: View {
             }
             AnalyticsService.track("buurt_filter", ["filter": value ?? "alles"])
         } label: {
+            // Figma (design review): 43 hoog, 18 semibold, gekozen = groen1 met
+            // groen4-rand van 1.5; anders wit met grijze rand. Geen schaduw.
             Text(title)
-                .font(AppFont.theSans(size: 13, weight: .semiBold))
-                .foregroundColor(isSelected ? AppColors.groen3 : AppColors.textPrimary)
-                .padding(.horizontal, 13)
-                .padding(.vertical, 8)
-                .background(isSelected ? AppColors.groen3.opacity(0.12) : Color.white)
+                .font(AppFont.theSans(size: 18, weight: .semiBold))
+                .foregroundColor(isSelected ? AppColors.groen4 : AppColors.textSecondary)
+                .lineLimit(1)
+                .padding(.horizontal, 16)
+                .frame(height: 43)
+                .background(isSelected ? AppColors.groen1 : Color.white)
                 .clipShape(Capsule())
                 .overlay(
-                    Capsule().stroke(isSelected ? AppColors.groen3 : AppColors.grijs2, lineWidth: 1)
+                    Capsule().strokeBorder(isSelected ? AppColors.groen4 : AppColors.grijs2,
+                                           lineWidth: isSelected ? 1.5 : 1)
                 )
-                .shadow(color: Color.black.opacity(0.08), radius: 2, x: 0, y: 1)
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Knoppen onderin
+
+    /// "5 in de buurt", "5 stallingen" of "5 plekken".
+    private var telLabel: String {
+        let n = filteredItems.count
+        switch effectiveFilter {
+        case "fietsparkeren": return String(format: lang.t("buurt_n_stallingen"), n)
+        case "koffie": return String(format: lang.t("buurt_n_plekken"), n)
+        default: return String(format: lang.t("buurt_n_in_de_buurt"), n)
+        }
+    }
+
+    private func zet(_ w: Weergave) {
+        if w == .kaartjes, selectedItemID == nil, let first = filteredItems.first?.id {
+            selectedItemID = first
+            scrolledID = first
+        }
+        // Ingeklapt: geen gekozen (groene) marker meer, zoals in Figma.
+        if w == .kaart, weergave == .kaartjes {
+            selectedItemID = nil
+            scrolledID = nil
+        }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { weergave = w }
+        AnalyticsService.track("buurt_weergave", ["weergave": String(describing: w)])
+    }
+
+    private func kiesUitLijst(_ item: NeighbourhoodItem) {
+        if item.plek == nil {
+            detailItem = item
+        } else {
+            // Een vaste plek: terug naar de kaart, met dit kaartje open.
+            selectedItemID = item.id
+            scrolledID = item.id
+            zet(.kaartjes)
+            if let i = items.first(where: { $0.id == item.id }) {
+                moveCamera(to: Self.regioMet(homeCoordinate, i.coordinate))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var onderknoppen: some View {
+        HStack(spacing: 8) {
+            switch weergave {
+            case .kaart:
+                if !filteredItems.isEmpty {
+                    pil(telLabel, icoon: "chevron.up", groen: false) { zet(.kaartjes) }
+                }
+                pil(lang.t("buurt_lijst"), icoon: "list.bullet", groen: true) { zet(.lijst) }
+            case .kaartjes:
+                pil(lang.t("buurt_verberg"), icoon: "chevron.down", groen: false) { zet(.kaart) }
+                pil(lang.t("buurt_lijst"), icoon: "list.bullet", groen: true) { zet(.lijst) }
+            case .lijst:
+                pil(lang.t("buurt_kaart"), icoon: "pin", groen: true) { zet(.kaart) }
+            }
+        }
+    }
+
+    /// Figma: 48 hoog, volledig rond; wit (16 opzij, 6 tussen) of groen (20 opzij, 8 tussen).
+    private func pil(_ titel: String, icoon: String, groen: Bool, _ actie: @escaping () -> Void) -> some View {
+        Button(action: actie) {
+            HStack(spacing: groen ? 8 : 6) {
+                Group {
+                    if icoon == "pin" {
+                        Image("location-pin").renderingMode(.template).resizable().scaledToFit()
+                            .frame(width: 22, height: 22)
+                    } else {
+                        Image(systemName: icoon).font(.system(size: 16, weight: .semibold))
+                    }
+                }
+                .frame(width: 24, height: 24)
+                Text(titel)
+                    .font(AppFont.theSans(size: 17, weight: .bold))
+                    .lineLimit(1)
+            }
+            .foregroundColor(groen ? .white : Color(hex: "2E2E2E"))
+            .padding(.horizontal, groen ? 20 : 16)
+            .frame(height: 48)
+            .background(groen ? AppColors.groen3 : Color.white)
+            .clipShape(Capsule())
+            .shadow(color: .black.opacity(0.12), radius: 6, x: 0, y: 2)
+        }
+        .buttonStyle(PressableScaleStyle())
     }
 
     // MARK: - Carousel

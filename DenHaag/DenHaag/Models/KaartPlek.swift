@@ -45,6 +45,31 @@ struct KaartPlek: Identifiable, Equatable {
         return hours[(weekday + 5) % 7]
     }
 
+    /// Sluitingstijd als de plek nú open is ("03:00"), anders nil. Kijkt ook
+    /// naar gisteren, voor tijden die over middernacht lopen (07:30 – 03:00).
+    func openTot(_ nu: Date = Date()) -> String? {
+        let cal = Calendar.current
+        let minuut = cal.component(.hour, from: nu) * 60 + cal.component(.minute, from: nu)
+        let vandaag = (cal.component(.weekday, from: nu) + 5) % 7
+        func delen(_ s: String?) -> (Int, Int, String)? {
+            guard let s else { return nil }
+            let p = s.components(separatedBy: "–").map { $0.trimmingCharacters(in: .whitespaces) }
+            guard p.count == 2 else { return nil }
+            func m(_ t: String) -> Int? {
+                let hm = t.split(separator: ":").compactMap { Int($0) }
+                return hm.count == 2 ? hm[0] * 60 + hm[1] : nil
+            }
+            guard let a = m(p[0]), let b = m(p[1]) else { return nil }
+            return (a, b, p[1])
+        }
+        if let (a, b, eind) = delen(hours[vandaag]) {
+            if b > a ? (minuut >= a && minuut < b) : (minuut >= a) { return eind }
+        }
+        // Gisteren open tot na middernacht?
+        if let (a, b, eind) = delen(hours[(vandaag + 6) % 7]), b <= a, minuut < b { return eind }
+        return nil
+    }
+
     static func == (lhs: KaartPlek, rhs: KaartPlek) -> Bool { lhs.id == rhs.id }
 
     /// Zelfde tijden op alle zeven dagen.
