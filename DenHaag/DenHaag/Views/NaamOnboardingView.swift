@@ -9,78 +9,114 @@ struct NaamOnboardingView: View {
 
     @FocusState private var focus: Bool
 
+    private var safeTop: CGFloat { AppDesign.safeAreaTop }
+
+    /// "Hi jij," wordt live "Hi Anne," terwijl je typt (Figma variant A).
+    private var groet: String {
+        let naam = settings.userName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return naam.isEmpty ? lang.t("naam_hi_jij") : String(format: lang.t("naam_hi"), naam)
+    }
+
+    /// Design review 2026-11, variant A "Geel vlak": dezelfde gele kop als home,
+    /// zodat de eerste indruk meteen aansluit op wat je daarna ziet.
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             AppColors.background.ignoresSafeArea()
                 .onTapGesture { focus = false }
 
             VStack(spacing: 0) {
-                // Compact bovenaan: "Overslaan" moet boven het toetsenbord blijven.
-                Spacer().frame(height: 24)
+                gelekop
 
-                Image("ill-buurt")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 120)
-                    .padding(.bottom, 24)
+                VStack(spacing: 0) {
+                    TextField(lang.t("onb_naam_placeholder"), text: $settings.userName)
+                        .font(AppFont.theSans(size: 18, weight: .plain))
+                        .padding(.horizontal, 18)
+                        .frame(height: 59)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(focus ? AppColors.groen3 : AppColors.grijs2, lineWidth: focus ? 1.5 : 1)
+                        )
+                        .focused($focus)
+                        .textContentType(.givenName)
+                        .submitLabel(.go)
+                        .onSubmit(klaar)
 
-                Text(lang.t("naam_welkom"))
-                    .font(AppFont.theMix(size: 30, weight: .bold))
-                    .foregroundColor(AppColors.darkGrey)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.bottom, 10)
+                    Button(action: klaar) {
+                        Text(lang.t("naam_start"))
+                            .font(AppFont.theSans(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 55)
+                            .background(AppColors.groen3)
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 16)
 
-                Text(lang.t("naam_vraag"))
-                    .font(AppFont.theSans(size: 18, weight: .plain))
-                    .foregroundColor(AppColors.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 28)
-
-                TextField(lang.t("onb_naam_placeholder"), text: $settings.userName)
-                    .font(AppFont.theSans(size: 20, weight: .plain))
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 16)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: AppDesign.cornerRadius))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
-                            .stroke(focus ? AppColors.groen3 : AppColors.grijs2, lineWidth: focus ? 1.5 : 1)
-                    )
-                    .focused($focus)
-                    .textContentType(.givenName)
-                    .submitLabel(.go)
-                    .onSubmit(klaar)
-
-                Button(action: klaar) {
-                    Text(lang.t("naam_start"))
-                        .font(AppFont.theSans(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(AppColors.groen3)
-                        .clipShape(RoundedRectangle(cornerRadius: AppDesign.cornerRadius))
+                    Button(action: { settings.userName = ""; klaar() }) {
+                        Text(lang.t("onb_skip"))
+                            .font(AppFont.theSans(size: 17, weight: .bold))
+                            .foregroundColor(AppColors.groen3)
+                            .padding(.vertical, 8)
+                    }
+                    .padding(.top, 8)
                 }
-                .buttonStyle(.plain)
-                .padding(.top, 16)
+                .padding(.horizontal, AppDesign.horizontalPadding)
+                .padding(.top, 28)
 
-                Button(action: { settings.userName = ""; klaar() }) {
-                    Text(lang.t("onb_skip"))
-                        .font(AppFont.theSans(size: 16, weight: .bold))
-                        .foregroundColor(AppColors.groen3)
-                        .padding(.vertical, 12)
-                }
-                .padding(.top, 4)
-
-                Spacer()
+                Spacer(minLength: 0)
             }
-            .padding(.horizontal, AppDesign.horizontalPadding)
         }
+        .ignoresSafeArea(edges: .top)
+        // Het toetsenbord mag de kop niet samendrukken; alles past erboven.
+        .ignoresSafeArea(.keyboard)
         .onAppear {
             settings.userName = ""
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { focus = true }
             AnalyticsService.screen("naam_onboarding")
         }
+    }
+
+    private var gelekop: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(groet)
+                .font(AppFont.theMix(size: 38, weight: .extraBold))
+                .foregroundColor(Color(hex: "1D1A0D"))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .animation(.easeOut(duration: 0.15), value: groet)
+            Text(lang.t("naam_vraag"))
+                .font(AppFont.theMix(size: 22, weight: .bold))
+                .foregroundColor(Color(hex: "1D1A0D"))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, AppDesign.horizontalPadding)
+        .padding(.top, safeTop + 50)
+        // Figma: geel vlak loopt tot 257 pt onder de statusbalk, met de boog van home.
+        .frame(height: safeTop + 257, alignment: .top)
+        .background(
+            // Zelfde schaal en uitsnede als de home-kop (HeaderView), die ca.
+            // 468 pt hoog is; anders lijken de facetten ingezoomd.
+            GeometryReader { geo in
+                let homeHoogte: CGFloat = 468
+                Image("facetten-geel")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width * 1.4, height: homeHoogte * 1.4)
+                    .position(x: geo.size.width / 2, y: homeHoogte / 2)
+            }
+            .clipped()
+        )
+        .overlay(alignment: .bottom) {
+            BottomTransitionShape(isLarge: true)
+                .fill(AppColors.background)
+                .frame(height: 50)
+                .allowsHitTesting(false)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { focus = false }
     }
 
     private func klaar() {

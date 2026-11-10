@@ -108,7 +108,7 @@ struct HomeStatusCard: Identifiable {
 // MARK: - Arch Shape (for large header bottom)
 
 /// Animatable bottom transition shape — notch for small header, arch for large header
-private struct BottomTransitionShape: Shape {
+struct BottomTransitionShape: Shape {
     var isLarge: Bool
 
     func path(in rect: CGRect) -> Path {
